@@ -1,0 +1,1378 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 7/6/2016 1:03:01 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :  MASTERMIND
+00000000                             3  * Written by :  PASTOR PICAZO, EDUARDO
+00000000                             4  *               FRANQUES GARCIA, ANTONIO MARIA
+00000000                             5  *-----------------------------------------------------------    
+00001000                             6          ORG $1000
+00001000                             7  
+00001000                             8  *****************************DEFINICIÓN DE CONSTANTES*****************************
+00001000                             9  *Colores
+00001000  =00000000                 10  NEGRO               EQU     $00000000
+00001000  =00FF0000                 11  AZUL                EQU     $00FF0000
+00001000  =0000FF00                 12  VERDE               EQU     $0000FF00
+00001000  =00000080                 13  MARRON              EQU     $00000080
+00001000  =000000FF                 14  ROJO                EQU     $000000FF
+00001000  =00FFFFFF                 15  BLANCO              EQU     $00FFFFFF
+00001000  =0000FFFF                 16  AMARILLO            EQU     $0000FFFF
+00001000  =00808080                 17  GRIS                EQU     $00808080
+00001000  =00800080                 18  LILA                EQU     $00800080
+00001000                            19  
+00001000                            20  *Popup propiedades: (Pop-up = Ventana Emergente).
+00001000                            21  *En el popup se pide el número de bolas por turno, número de turnos por partida
+00001000                            22  *y si permitimos colores repetidos en la combinación.
+00001000  =000001F4                 23  Popup_Anchura       EQU     500
+00001000  =00000190                 24  Popup_Altura        EQU     400
+00001000  =00000028                 25  Popup_Arriba        EQU     40
+00001000  =00000032                 26  Popup_Izq           EQU     50
+00001000  =000001B8                 27  Popup_Abajo         EQU     Popup_Arriba+Popup_Altura
+00001000  =00000226                 28  Popup_Der           EQU     Popup_Izq+Popup_Anchura
+00001000                            29  
+00001000  =0000001E                 30  Popup_txt_Altura    EQU     30                                      ;Distancia entre el borde superior del mensaje y el del botón correspondiente a ese mensaje. 
+00001000  =00000050                 31  Popup_txt_Izq       EQU     Popup_Izq+30                            ;Margen izquierdo entre el borde del Pop-up y el comienzo del mensaje.
+00001000  =00000032                 32  Popup_txt_Separa    EQU     50                                      ;Distancia entre el borde superior de un mensaje con el del siguiente mensaje.
+00001000                            33  
+00001000  =00000014                 34  Popup_Boton_Altura  EQU     20                                      ;Altura y a continuación anchura del botón que se usará para contestar al mensaje.
+00001000  =00000028                 35  Popup_Boton_Anchura EQU     40
+00001000  =00000005                 36  Popup_Boton_GapX    EQU     5                                       ;Hueco eje X entre dichos botones.
+00001000                            37  
+00001000  =0000005A                 38  Popup_txt1_Arriba   EQU     Popup_Arriba+50                         ;Posiciones del borde superior, inferior e izquierdo de la primera frase del popup
+00001000  =00000078                 39  Popup_txt1_Abajo    EQU     Popup_txt1_Arriba+Popup_txt_Altura
+00001000  =00000050                 40  Popup_txt1_Izq      EQU     Popup_txt_Izq
+00001000  =0000000F                 41  Popup_txt1_GapX     EQU     15                                      ;Huecos eje X e Y entre el borde del botón y el inicio del texto que tiene dentro (correspondientes al primer mensaje).
+00001000  =00000003                 42  Popup_txt1_GapY     EQU     3                                       
+00001000  =00000078                 43  Popup_B_txt1_Arriba EQU     Popup_txt1_Abajo                        ;Posiciones del borde superior e inferior de los botones correspondientes al primer mensaje. 
+00001000  =0000008C                 44  Popup_B_txt1_Abajo  EQU     Popup_B_txt1_Arriba+Popup_Boton_Altura
+00001000                            45  
+00001000  =00000050                 46  Cuatro_Boton_Izq    EQU     Popup_txt_Izq                           ;Posiciones del borde izquierdo y derecho del primer botón del primer mensaje
+00001000  =00000078                 47  Cuatro_Boton_der    EQU     Cuatro_Boton_Izq+Popup_Boton_Anchura
+00001000  =0000007B                 48  Cuatro_txt_Arriba   EQU     Popup_B_txt1_Arriba+Popup_txt1_GapY     ;Posición Y y X del inicio del texto contenido en el primer botón del primer mensaje.
+00001000  =0000005F                 49  Cuatro_txt_Izq      EQU     Cuatro_Boton_Izq+Popup_txt1_GapX
+00001000                            50  
+00001000  =0000007D                 51  Cinco_Boton_Izq     EQU     Cuatro_Boton_der+Popup_Boton_GapX       ;Posiciones del borde izquierdo y derecho del segundo botón del primer mensaje
+00001000  =000000A5                 52  Cinco_Boton_der     EQU     Cinco_Boton_Izq+Popup_Boton_Anchura
+00001000  =0000007B                 53  Cinco_txt_Arriba    EQU     Popup_B_txt1_Arriba+Popup_txt1_GapY     ;Posición Y y X del inicio del texto contenido en el segundo botón del primer mensaje.
+00001000  =0000008C                 54  Cinco_txt_Izq       EQU     Cinco_Boton_Izq+Popup_txt1_GapX
+00001000                            55  
+00001000  =000000AA                 56  Seis_Boton_Izq      EQU     Cinco_Boton_der+Popup_Boton_GapX        ;Posiciones del borde izquierdo y derecho del tercer botón del primer mensaje
+00001000  =000000D2                 57  Seis_Boton_der      EQU     Seis_Boton_Izq+Popup_Boton_Anchura
+00001000  =0000007B                 58  Seis_txt_Arriba     EQU     Popup_B_txt1_Arriba+Popup_txt1_GapY     ;Posición Y y X del inicio del texto contenido en el tercer botón del primer mensaje.
+00001000  =000000B9                 59  Seis_txt_Izq        EQU     Seis_Boton_Izq+Popup_txt1_GapX          
+00001000                            60  
+00001000  =000000BE                 61  Popup_txt2_Arriba   EQU     Popup_B_txt1_Abajo+Popup_txt_Separa     ;Posiciones del borde superior, inferior e izquierdo de la segunda frase del popup  
+00001000  =000000DC                 62  Popup_txt2_Abajo    EQU     Popup_txt2_Arriba+Popup_txt_Altura
+00001000  =00000050                 63  Popup_txt2_Izq      EQU     Popup_txt_Izq
+00001000  =0000000F                 64  Popup_txt2_GapX     EQU     15                                      ;Huecos eje X e Y entre el borde del botón y el inicio del texto que tiene dentro (correspondientes al segundo mensaje).
+00001000  =00000003                 65  Popup_txt2_GapY     EQU     3                                      
+00001000  =000000DC                 66  Popup_B_txt2_Arriba EQU     Popup_txt2_Abajo                        ;Posiciones del borde superior e inferior de los botones correspondientes al segundo mensaje. 
+00001000  =000000F0                 67  Popup_B_txt2_Abajo  EQU     Popup_B_txt2_Arriba+Popup_Boton_Altura  
+00001000                            68  
+00001000  =00000050                 69  Doce_Boton_Izq      EQU     Popup_txt_Izq                           ;Posiciones del borde izquierdo y derecho del primer botón del segundo mensaje
+00001000  =00000078                 70  Doce_Boton_der      EQU     Doce_Boton_Izq+Popup_Boton_Anchura
+00001000  =000000DF                 71  Doce_txt_Arriba     EQU     Popup_B_txt2_Arriba+Popup_txt2_GapY     ;Posición Y y X del inicio del texto contenido en el primer botón del segundo mensaje.
+00001000  =0000005F                 72  Doce_txt_Izq        EQU     Doce_Boton_Izq+Popup_txt2_GapX
+00001000                            73  
+00001000  =0000007D                 74  Dieci_Boton_Izq     EQU     Doce_Boton_der+Popup_Boton_GapX         ;Posiciones del borde izquierdo y derecho del segundo botón del segundo mensaje 
+00001000  =000000A5                 75  Dieci_Boton_der     EQU     Dieci_Boton_Izq+Popup_Boton_Anchura
+00001000  =000000DF                 76  Dieci_txt_Arriba    EQU     Popup_B_txt2_Arriba+Popup_txt2_GapY     ;Posición Y y X del inicio del texto contenido en el segundo botón del segundo mensaje.
+00001000  =0000008C                 77  Dieci_txt_Izq       EQU     Dieci_Boton_Izq+Popup_txt2_GapX
+00001000                            78  
+00001000  =00000122                 79  Popup_txt3_Arriba   EQU     Popup_B_txt2_Abajo+Popup_txt_Separa     ;Posiciones del borde superior, inferior e izquierdo de la tercera frase del popup
+00001000  =00000140                 80  Popup_txt3_Abajo    EQU     Popup_txt3_Arriba+Popup_txt_Altura
+00001000  =00000050                 81  Popup_txt3_Izq      EQU     Popup_txt_Izq
+00001000  =0000000F                 82  Popup_txt3_GapX     EQU     15                                      ;Huecos eje X e Y entre el borde del botón y el inicio del texto que tiene dentro (correspondientes al tercer mensaje).
+00001000  =00000003                 83  Popup_txt3_GapY     EQU     3                                      
+00001000  =00000140                 84  Popup_B_txt3_Arriba EQU     Popup_txt3_Abajo                        ;Posiciones del borde superior e inferior de los botones correspondientes al tercer mensaje 
+00001000  =00000154                 85  Popup_B_txt3_Abajo  EQU     Popup_B_txt3_Arriba+Popup_Boton_Altura  
+00001000                            86  
+00001000  =00000050                 87  Si_Boton_Izq        EQU     Popup_txt_Izq                           ;Posiciones del borde izquierdo y derecho del primer botón del tercer mensaje
+00001000  =00000078                 88  Si_Boton_der        EQU     Si_Boton_Izq+Popup_Boton_Anchura
+00001000  =00000143                 89  Si_txt_Arriba       EQU     Popup_B_txt3_Arriba+Popup_txt3_GapY     ;Posición Y y X del inicio del texto contenido en el primer botón del tercer mensaje.
+00001000  =0000005F                 90  Si_txt_Izq          EQU     Si_Boton_Izq+Popup_txt3_GapX
+00001000                            91  
+00001000  =0000007D                 92  No_Boton_Izq        EQU     Si_Boton_der+Popup_Boton_GapX           ;Posiciones del borde izquierdo y derecho del segundo botón del tercer mensaje
+00001000  =000000A5                 93  No_Boton_der        EQU     No_Boton_Izq+Popup_Boton_Anchura
+00001000  =00000143                 94  No_txt_Arriba       EQU     Popup_B_txt3_Arriba+Popup_txt3_GapY     ;Posición Y y X del inicio del texto contenido en el segundo botón del tercer mensaje.
+00001000  =0000008C                 95  No_txt_Izq          EQU     No_Boton_Izq+Popup_txt3_GapX
+00001000                            96  
+00001000                            97  *Tabla propiedades:
+00001000                            98  *En la tabla se irán añadiendo las bolas de colores correspondientes
+00001000                            99  *a cada turno y las pistas dadas al final de cada uno de éstos.
+00001000  =000000FF                100  Tabla_Anchura       EQU     255
+00001000  =000001F4                101  Tabla_Altura        EQU     500                                     ;Esta altura de la tabla donde serán pintandas las bolas se corresponde para 12 turnos.
+00001000  =0000001E                102  Tabla_Arriba        EQU     30
+00001000  =00000014                103  Tabla_Izq           EQU     20
+00001000  =00000212                104  Tabla_Abajo         EQU     Tabla_Arriba+Tabla_Altura
+00001000  =00000113                105  Tabla_der           EQU     Tabla_Izq+Tabla_Anchura
+00001000                           106  
+00001000  =0000003C                107  Pistas_Anchura      EQU     60
+00001000  =000001F4                108  Pistas_Altura       EQU     Tabla_Altura
+00001000  =0000001E                109  Pistas_Arriba       EQU     30
+00001000  =00000127                110  Pistas_Izq          EQU     Tabla_der+20
+00001000  =00000212                111  Pistas_Abajo        EQU     Pistas_Arriba+Pistas_Altura
+00001000  =00000163                112  Pistas_der          EQU     Pistas_Izq+Pistas_Anchura
+00001000                           113  
+00001000                           114  *Botones propiedades:
+00001000                           115  *Usados para seleccionar la bola a ser introducida
+00001000  =00000014                116  Color_Boton_Altura  EQU     20
+00001000  =00000032                117  Color_Boton_Anchura EQU     50
+00001000  =00000181                118  Color_Boton_Izq     EQU     Pistas_der+30
+00001000  =000001B3                119  Color_Boton_der     EQU     Color_Boton_Izq+Color_Boton_Anchura
+00001000  =00000005                120  Color_Boton_Gap     EQU     5                                       ;hueco eje Y entre botones
+00001000                           121  
+00001000  =0000001E                122  R_Boton_Arriba      EQU     30                                      ;Posiciones de los bordes superior e inferior de cada unos de los botones.
+00001000  =00000032                123  R_Boton_Abajo       EQU     R_Boton_Arriba+Color_Boton_Altura
+00001000                           124  
+00001000  =00000037                125  A_Boton_Arriba      EQU     R_Boton_Abajo+Color_Boton_Gap
+00001000  =0000004B                126  A_Boton_Abajo       EQU     A_Boton_Arriba+Color_Boton_Altura
+00001000                           127  
+00001000  =00000050                128  V_Boton_Arriba      EQU     A_Boton_Abajo+Color_Boton_Gap
+00001000  =00000064                129  V_Boton_Abajo       EQU     V_Boton_Arriba+Color_Boton_Altura
+00001000                           130  
+00001000  =00000069                131  N_Boton_Arriba      EQU     V_Boton_Abajo+Color_Boton_Gap
+00001000  =0000007D                132  N_Boton_Abajo       EQU     N_Boton_Arriba+Color_Boton_Altura
+00001000                           133  
+00001000  =00000082                134  M_Boton_Arriba      EQU     N_Boton_Abajo+Color_Boton_Gap
+00001000  =00000096                135  M_Boton_Abajo       EQU     M_Boton_Arriba+Color_Boton_Altura
+00001000                           136  
+00001000  =0000009B                137  B_Boton_Arriba      EQU     M_Boton_Abajo+Color_Boton_Gap
+00001000  =000000AF                138  B_Boton_Abajo       EQU     B_Boton_Arriba+Color_Boton_Altura
+00001000                           139  
+00001000                           140  *Fichas propiedades:
+00001000                           141  *Bolas usadas para entrar la combinación deseada por el usuario.
+00001000  =0000001E                142  Ficha_Altura        EQU     30
+00001000  =0000001E                143  Ficha_Anchura       EQU     30
+00001000  =0000000A                144  Ficha_Gap           EQU     10                                      ;hueco eje Y entre la ficha de un turno y la de otro turno
+00001000                           145  
+00001000                           146  *Bolas Pistas propiedades:
+00001000                           147  *Usadas para decirle al usuario cuantas ha posicionado bien y mal.
+00001000  =0000000D                148  BPistas_Altura      EQU     13
+00001000  =0000000D                149  BPistas_Anchura     EQU     13
+00001000  =00000005                150  BPistas_Gap         EQU     5                                       ;hueco eje X entre bolas de pistas
+00001000  =00000005                151  BPistas_GapY        EQU     5                                       ;hueco eje Y entre filas de bolas de pistas del mismo turno.
+00001000                           152  
+00001000                           153  *Botón Instrucciones propiedades:
+00001000  =00000014                154  Inst_Boton_Altura   EQU     20
+00001000  =000000C8                155  Inst_Boton_Anchura  EQU     200
+00001000  =0000001E                156  Inst_Boton_Arriba   EQU     30
+00001000  =00000032                157  Inst_Boton_Abajo    EQU     Inst_Boton_Arriba+Inst_Boton_Altura
+00001000  =000001D1                158  Inst_Boton_Izq      EQU     Color_Boton_der+30
+00001000  =00000299                159  Inst_Boton_der      EQU     Inst_Boton_Izq+Inst_Boton_Anchura
+00001000  =00000021                160  Inst_B_txt_Arriba   EQU     Inst_Boton_Arriba+3                     ;Posición Y y X del texto dentro del botón.
+00001000  =000001E2                161  Inst_B_txt_Izq      EQU     Inst_Boton_Izq+17
+00001000                           162  
+00001000                           163  *Texto Instrucciones propiedades
+00001000  =00000046                164  Texto_info_Arriba   EQU     Inst_Boton_Abajo+20
+00001000  =000001D1                165  Texto_info_Izq      EQU     Inst_Boton_Izq
+00001000  =00000429                166  Texto_info_Der      EQU     Texto_info_Izq+600                      ;defino tanto el límite derecho como el inferior para borrar el texto al cerrar las instrucciones.
+00001000  =000001E0                167  Texto_info_Abajo    EQU     Texto_info_Arriba+410
+00001000  =00000014                168  Texto_Info_Gap      EQU     20                                      ;espacio entre lineas del mensaje.
+00001000                           169  ***************************FIN DEFINICIÓN DE CONSTANTES***************************
+00001000                           170  
+00001000                           171  START:
+00001000                           172  *************************VENTANA DE CONFIGURACIÓN INICIAL*************************
+00001000                           173          *Aparición del Pop-up 
+00001000  7201                     174          MOVE.L #1,D1                                                
+00001002  705D                     175          MOVE.L #93,D0                                               ;Ancho de pluma = 1 (La pluma es usada para hacer el contorno de las figuras)
+00001004  4E4F                     176          TRAP #15
+00001006                           177      
+00001006  223C 0000FF00            178          MOVE.L #VERDE,D1
+0000100C  7050                     179          MOVE.L #80,D0                                               ;Cambio color de pluma
+0000100E  4E4F                     180          TRAP #15
+00001010                           181      
+00001010  223C 00808080            182          MOVE.L #GRIS,D1
+00001016  7051                     183          MOVE.L #81,D0                                               ;Cambio color de relleno (fondo del popup)
+00001018  4E4F                     184          TRAP #15
+0000101A                           185      
+0000101A  7232                     186          MOVE.L #Popup_Izq,D1                                        ;Valor inicial X
+0000101C  7428                     187          MOVE.L #Popup_Arriba,D2                                     ;Valor inicial Y
+0000101E  263C 00000226            188          MOVE.L #Popup_der,D3                                        ;Valor final X
+00001024  283C 000001B8            189          MOVE.L #Popup_Abajo,D4                                      ;Valor final Y
+0000102A  7057                     190          MOVE.L #87,D0                                               ;Dibujar rectangulo que limitará la zona del popup
+0000102C  4E4F                     191          TRAP #15
+0000102E                           192          
+0000102E                           193          *Pido numero de bolas por turno
+0000102E  227C 000033CF            194          MOVE.L #MSJ2,A1
+00001034  705F                     195          MOVE.L #95,D0
+00001036  7250                     196          MOVE.L #Popup_txt1_Izq,D1
+00001038  745A                     197          MOVE.L #Popup_txt1_Arriba,D2
+0000103A  4E4F                     198          TRAP #15                                                    ;Escribir el primer mensaje en el popup
+0000103C                           199      
+0000103C  223C 000000FF            200          MOVE.L #ROJO,D1
+00001042  7051                     201          MOVE.L #81,D0                                               ;Cambio color de relleno
+00001044  4E4F                     202          TRAP #15
+00001046  7250                     203          MOVE.L #Cuatro_Boton_Izq,D1                                 ;Valor inicial X
+00001048  7478                     204          MOVE.L #Popup_B_txt1_Arriba,D2                              ;Valor inicial Y
+0000104A  7678                     205          MOVE.L #Cuatro_Boton_der,D3                                 ;Valor final X
+0000104C  283C 0000008C            206          MOVE.L #Popup_B_txt1_Abajo,D4                               ;Valor final Y
+00001052  7057                     207          MOVE.L #87,D0                                               ;Dibujar rectangulo del primer botón del primer mensaje
+00001054  4E4F                     208          TRAP #15
+00001056  227C 000033EA            209          MOVE.L #MSJ21,A1
+0000105C  705F                     210          MOVE.L #95,D0
+0000105E  725F                     211          MOVE.L #Cuatro_txt_Izq,D1
+00001060  747B                     212          MOVE.L #Cuatro_txt_Arriba,D2
+00001062  4E4F                     213          TRAP #15                                                    ;Escribir dentro del botón recien dibujado el texto que le corresponde a este.
+00001064                           214      
+00001064  727D                     215          MOVE.L #Cinco_Boton_Izq,D1                                  ;Valor inicial X
+00001066  7478                     216          MOVE.L #Popup_B_txt1_Arriba,D2                              ;Valor inicial Y
+00001068  263C 000000A5            217          MOVE.L #Cinco_Boton_der,D3                                  ;Valor final X
+0000106E  283C 0000008C            218          MOVE.L #Popup_B_txt1_Abajo,D4                               ;Valor final Y
+00001074  7057                     219          MOVE.L #87,D0                                               ;Dibujar rectangulo del segundo botón del primer mensaje
+00001076  4E4F                     220          TRAP #15
+00001078  227C 000033EC            221          MOVE.L #MSJ22,A1
+0000107E  705F                     222          MOVE.L #95,D0
+00001080  223C 0000008C            223          MOVE.L #Cinco_txt_Izq,D1
+00001086  747B                     224          MOVE.L #Cinco_txt_Arriba,D2
+00001088  4E4F                     225          TRAP #15                                                    ;Escribir dentro del botón recien dibujado el texto que le corresponde a este.
+0000108A                           226      
+0000108A  223C 000000AA            227          MOVE.L #Seis_Boton_Izq,D1                                   ;Valor inicial X
+00001090  7478                     228          MOVE.L #Popup_B_txt1_Arriba,D2                              ;Valor inicial Y
+00001092  263C 000000D2            229          MOVE.L #Seis_Boton_der,D3                                   ;Valor final X
+00001098  283C 0000008C            230          MOVE.L #Popup_B_txt1_Abajo,D4                               ;Valor final Y
+0000109E  7057                     231          MOVE.L #87,D0                                               ;Dibujar rectangulo del tercer botón del primer mensaje
+000010A0  4E4F                     232          TRAP #15
+000010A2  227C 000033EE            233          MOVE.L #MSJ23,A1
+000010A8  705F                     234          MOVE.L #95,D0
+000010AA  223C 000000B9            235          MOVE.L #Seis_txt_Izq,D1
+000010B0  747B                     236          MOVE.L #Seis_txt_Arriba,D2
+000010B2  4E4F                     237          TRAP #15                                                    ;Escribir dentro del botón recien dibujado el texto que le corresponde a este.
+000010B4                           238      
+000010B4                           239  CHKB    *Compruebo numero de bolas por turno
+000010B4  7200                     240          MOVE.L #0,D1 
+000010B6  703D                     241          MOVE.L #61,D0                                               ;Compruebo el estado del ratón (posición X,Y será almacenada en D1 y pulsación del botón en D0)
+000010B8  4E4F                     242          TRAP #15
+000010BA                           243      
+000010BA  B03C 0001                244          CMP.B #1,D0
+000010BE  65F4                     245          BCS CHKB                                                    ;si no está ningún botón del ratón pulsado sigue esperando a que lo esté
+000010C0                           246      
+000010C0  4841                     247          SWAP D1                                                     ;intercambio la parte alta con la baja para así comprobar el valor de Y
+000010C2  B27C 0078                248          CMP.W #Popup_B_txt1_Arriba,D1
+000010C6  65EC                     249          BCS CHKB                                                    
+000010C8  B27C 008C                250          CMP.W #Popup_B_txt1_Abajo,D1
+000010CC  62E6                     251          BHI CHKB
+000010CE                           252      
+000010CE  4841                     253          SWAP D1                                                     ;intercambio nuevamente para volver a tener la WORD X en la parte baja
+000010D0  B27C 0050                254          CMP.W #Cuatro_Boton_Izq,D1
+000010D4  65DE                     255          BCS CHKB
+000010D6  B27C 0078                256          CMP.W #Cuatro_Boton_Der,D1
+000010DA  6200 0010                257          BHI CHK_5
+000010DE  13FC 0004 00003022       258          MOVE.B #4,NBOLAS                                            ;El usuario ha pinchado en el botón de 4 bolas
+000010E6  4EF9 0000111C            259          JMP CANT
+000010EC                           260      
+000010EC  B27C 007D                261  CHK_5   CMP.W #Cinco_Boton_Izq,D1
+000010F0  65C2                     262          BCS CHKB
+000010F2  B27C 00A5                263          CMP.W #Cinco_Boton_Der,D1
+000010F6  6200 0010                264          BHI CHK_6
+000010FA  13FC 0005 00003022       265          MOVE.B #5,NBOLAS                                            ;El usuario ha pinchado en el botón de 5 bolas
+00001102  4EF9 0000111C            266          JMP CANT 
+00001108                           267          
+00001108  B27C 00AA                268  CHK_6   CMP.W #Seis_Boton_Izq,D1
+0000110C  65A6                     269          BCS CHKB
+0000110E  B27C 00D2                270          CMP.W #Seis_Boton_Der,D1
+00001112  62A0                     271          BHI CHKB
+00001114  13FC 0006 00003022       272          MOVE.B #6,NBOLAS                                            ;El usuario ha pinchado en el botón de 6 bolas
+0000111C                           273          
+0000111C                           274  CANT    *Pido cantidad de turnos por partida
+0000111C  223C 00808080            275          MOVE.L #GRIS,D1
+00001122  7051                     276          MOVE.L #81,D0                                               ;Cambio color de relleno
+00001124  4E4F                     277          TRAP #15
+00001126  227C 000033F0            278          MOVE.L #MSJ3,A1
+0000112C  705F                     279          MOVE.L #95,D0
+0000112E  7250                     280          MOVE.L #Popup_txt2_Izq,D1
+00001130  243C 000000BE            281          MOVE.L #Popup_txt2_Arriba,D2
+00001136  4E4F                     282          TRAP #15
+00001138                           283      
+00001138  223C 000000FF            284          MOVE.L #ROJO,D1
+0000113E  7051                     285          MOVE.L #81,D0                                               ;Cambio color de relleno
+00001140  4E4F                     286          TRAP #15
+00001142                           287          
+00001142  7250                     288          MOVE.L #Doce_Boton_Izq,D1                                   ;Valor inicial X
+00001144  243C 000000DC            289          MOVE.L #Popup_B_txt2_Arriba,D2                              ;Valor inicial Y
+0000114A  7678                     290          MOVE.L #Doce_Boton_der,D3                                   ;Valor final X
+0000114C  283C 000000F0            291          MOVE.L #Popup_B_txt2_Abajo,D4                               ;Valor final Y
+00001152  7057                     292          MOVE.L #87,D0                                               ;Dibujar rectangulo
+00001154  4E4F                     293          TRAP #15
+00001156  227C 00003410            294          MOVE.L #MSJ31,A1
+0000115C  705F                     295          MOVE.L #95,D0
+0000115E  725F                     296          MOVE.L #Doce_txt_Izq,D1
+00001160  243C 000000DF            297          MOVE.L #Doce_txt_Arriba,D2
+00001166  4E4F                     298          TRAP #15
+00001168                           299      
+00001168  727D                     300          MOVE.L #Dieci_Boton_Izq,D1                                  ;Valor inicial X
+0000116A  243C 000000DC            301          MOVE.L #Popup_B_txt2_Arriba,D2                              ;Valor inicial Y
+00001170  263C 000000A5            302          MOVE.L #Dieci_Boton_der,D3                                  ;Valor final X
+00001176  283C 000000F0            303          MOVE.L #Popup_B_txt2_Abajo,D4                               ;Valor final Y
+0000117C  7057                     304          MOVE.L #87,D0                                               ;Dibujar rectangulo
+0000117E  4E4F                     305          TRAP #15
+00001180  227C 00003413            306          MOVE.L #MSJ32,A1
+00001186  705F                     307          MOVE.L #95,D0
+00001188  223C 0000008C            308          MOVE.L #Dieci_txt_Izq,D1
+0000118E  243C 000000DF            309          MOVE.L #Dieci_txt_Arriba,D2
+00001194  4E4F                     310          TRAP #15
+00001196                           311          
+00001196                           312  CHKC    *Compruebo cantidad de turnos por partida
+00001196  7200                     313          MOVE.L #0,D1 
+00001198  703D                     314          MOVE.L #61,D0                                               ;check mouse state
+0000119A  4E4F                     315          TRAP #15
+0000119C                           316      
+0000119C  B03C 0001                317          CMP.B #1,D0
+000011A0  65F4                     318          BCS CHKC
+000011A2                           319      
+000011A2  4841                     320          SWAP D1
+000011A4  B27C 00DC                321          CMP.W #Popup_B_txt2_Arriba,D1
+000011A8  65EC                     322          BCS CHKC
+000011AA  B27C 00F0                323          CMP.W #Popup_B_txt2_Abajo,D1
+000011AE  62E6                     324          BHI CHKC
+000011B0                           325      
+000011B0  4841                     326          SWAP D1
+000011B2  B27C 0050                327          CMP.W #Doce_Boton_Izq,D1
+000011B6  65DE                     328          BCS CHKC
+000011B8  B27C 0078                329          CMP.W #Doce_Boton_Der,D1
+000011BC  6200 0010                330          BHI CHK_DI
+000011C0  13FC 000C 00003023       331          MOVE.B #12,TURNO                                            ;El usuario ha pinchado en el botón de 12 turnos.
+000011C8  4EF9 000011E2            332          JMP PERM
+000011CE                           333      
+000011CE  B27C 007D                334  CHK_DI  CMP.W #Dieci_Boton_Izq,D1
+000011D2  65C2                     335          BCS CHKC
+000011D4  B27C 00A5                336          CMP.W #Dieci_Boton_Der,D1
+000011D8  62BC                     337          BHI CHKC
+000011DA  13FC 0010 00003023       338          MOVE.B #16,TURNO                                            ;El usuario ha pinchado en el botón de 16 turnos.
+000011E2                           339          
+000011E2                           340  PERM    *Pido ¿Permitir repeticiones?
+000011E2  223C 00808080            341          MOVE.L #GRIS,D1
+000011E8  7051                     342          MOVE.L #81,D0                                               ;Cambio color de relleno
+000011EA  4E4F                     343          TRAP #15
+000011EC  227C 00003416            344          MOVE.L #MSJ4,A1
+000011F2  705F                     345          MOVE.L #95,D0
+000011F4  7250                     346          MOVE.L #Popup_txt3_Izq,D1
+000011F6  243C 00000122            347          MOVE.L #Popup_txt3_Arriba,D2
+000011FC  4E4F                     348          TRAP #15
+000011FE                           349      
+000011FE  223C 000000FF            350          MOVE.L #ROJO,D1
+00001204  7051                     351          MOVE.L #81,D0                                               ;Cambio color de relleno
+00001206  4E4F                     352          TRAP #15
+00001208                           353          
+00001208  7250                     354          MOVE.L #Si_Boton_Izq,D1                                     ;Valor inicial X
+0000120A  243C 00000140            355          MOVE.L #Popup_B_txt3_Arriba,D2                              ;Valor inicial Y
+00001210  7678                     356          MOVE.L #Si_Boton_der,D3                                     ;Valor final X
+00001212  283C 00000154            357          MOVE.L #Popup_B_txt3_Abajo,D4                               ;Valor final Y
+00001218  7057                     358          MOVE.L #87,D0                                               ;Dibujar rectangulo
+0000121A  4E4F                     359          TRAP #15
+0000121C  227C 0000342F            360          MOVE.L #MSJSI,A1
+00001222  705F                     361          MOVE.L #95,D0
+00001224  725F                     362          MOVE.L #Si_txt_Izq,D1
+00001226  243C 00000143            363          MOVE.L #Si_txt_Arriba,D2
+0000122C  4E4F                     364          TRAP #15
+0000122E                           365      
+0000122E  727D                     366          MOVE.L #No_Boton_Izq,D1                                     ;Valor inicial X
+00001230  243C 00000140            367          MOVE.L #Popup_B_txt3_Arriba,D2                              ;Valor inicial Y
+00001236  263C 000000A5            368          MOVE.L #No_Boton_der,D3                                     ;Valor final X
+0000123C  283C 00000154            369          MOVE.L #Popup_B_txt3_Abajo,D4                               ;Valor final Y
+00001242  7057                     370          MOVE.L #87,D0                                               ;Dibujar rectangulo
+00001244  4E4F                     371          TRAP #15
+00001246  227C 00003432            372          MOVE.L #MSJNO,A1
+0000124C  705F                     373          MOVE.L #95,D0
+0000124E  223C 0000008C            374          MOVE.L #No_txt_Izq,D1
+00001254  243C 00000143            375          MOVE.L #No_txt_Arriba,D2
+0000125A  4E4F                     376          TRAP #15
+0000125C                           377          
+0000125C                           378  CHKP    *Compruebo ¿Permitir repeticiones?
+0000125C  7200                     379          MOVE.L #0,D1 
+0000125E  703D                     380          MOVE.L #61,D0                                               ;check mouse state
+00001260  4E4F                     381          TRAP #15
+00001262                           382      
+00001262  B03C 0001                383          CMP.B #1,D0
+00001266  65F4                     384          BCS CHKP
+00001268                           385      
+00001268  4841                     386          SWAP D1
+0000126A  B27C 0140                387          CMP.W #Popup_B_txt3_Arriba,D1
+0000126E  65EC                     388          BCS CHKP
+00001270  B27C 0154                389          CMP.W #Popup_B_txt3_Abajo,D1
+00001274  62E6                     390          BHI CHKP
+00001276                           391      
+00001276  4841                     392          SWAP D1
+00001278  B27C 0050                393          CMP.W #Si_Boton_Izq,D1
+0000127C  65DE                     394          BCS CHKP
+0000127E  B27C 0078                395          CMP.W #Si_Boton_Der,D1
+00001282  6200 0010                396          BHI CHK_NO
+00001286  13FC 0001 00003024       397          MOVE.B #1,REPET                                             ;El usuario ha pinchado en "Sí permitir repeticiones"
+0000128E  4EF9 000012A8            398          JMP FINPOP
+00001294                           399      
+00001294  B27C 007D                400  CHK_NO  CMP.W #No_Boton_Izq,D1
+00001298  65C2                     401          BCS CHKP
+0000129A  B27C 00A5                402          CMP.W #No_Boton_Der,D1
+0000129E  62BC                     403          BHI CHKP
+000012A0  13FC 0000 00003024       404          MOVE.B #0,REPET                                             ;El usuario ha pinchado en "No permitir repeticiones"
+000012A8                           405  
+000012A8                           406  *Fin del Pop-up
+000012A8  103C 0021                407  FINPOP  MOVE.B #33,D0
+000012AC  223C 04000226            408          MOVE.L #1024*$10000+550,D1                                  ;Establecer la resolución de la pantalla
+000012B2  0C39 0010 00003023       409          CMP.B #16,TURNO
+000012BA  6500 0006                410          BCS NOMOD                                                   ;si los turnos son 12 no modifiques la altura
+000012BE  0641 0096                411          ADD.W #150,D1
+000012C2  4E4F                     412  NOMOD   TRAP #15
+000012C4                           413      
+000012C4  705E                     414          MOVE.L #94,D0                                               ;Limpiar pantalla
+000012C6  4E4F                     415          TRAP #15
+000012C8                           416  *************************FIN VENTANA DE CONFIGURACIÓN INICIAL***********************
+000012C8                           417  
+000012C8                           418  **********************************DIBUJO ESTRUCTURA*********************************    
+000012C8                           419          *RECTANGULO TABLA*
+000012C8  223C 00FF0000            420          MOVE.L #AZUL,D1
+000012CE  7051                     421          MOVE.L #81,D0                                               ;Cambio color de relleno
+000012D0  4E4F                     422          TRAP #15
+000012D2                           423      
+000012D2  7214                     424          MOVE.L #Tabla_Izq,D1                                        ;Valor inicial X
+000012D4  741E                     425          MOVE.L #Tabla_Arriba,D2                                     ;Valor inicial Y
+000012D6  263C 00000113            426          MOVE.L #Tabla_der,D3                                        ;Valor final X
+000012DC  283C 00000212            427          MOVE.L #Tabla_Abajo,D4                                      ;Valor final Y
+000012E2  7057                     428          MOVE.L #87,D0                                               ;Dibujar rectangulo tabla
+000012E4  0C39 0010 00003023       429          CMP.B #16,TURNO
+000012EC  6500 0008                430          BCS NOALARG
+000012F0  0684 00000096            431          ADD.L #150,D4                                               ;si hemos configurado 16 turnos alargamos la tabla
+000012F6  4E4F                     432  NOALARG TRAP #15
+000012F8                           433      
+000012F8                           434          *RECTANGULO PISTAS*
+000012F8  223C 00000127            435          MOVE.L #Pistas_Izq,D1                                       ;Valor inicial X
+000012FE  263C 00000163            436          MOVE.L #Pistas_der,D3                                       ;Valor final X
+00001304  7057                     437          MOVE.L #87,D0                                               ;Dibujar rectangulo pistas (aprovecho el valor de D2 y D4 del rectangulo tabla)
+00001306  4E4F                     438          TRAP #15
+00001308                           439      
+00001308                           440          *RECTANGULO COLOR ROJO*
+00001308  223C 000000FF            441          MOVE.L #ROJO,D1
+0000130E  7051                     442          MOVE.L #81,D0                                               ;Cambio color de relleno
+00001310  4E4F                     443          TRAP #15
+00001312                           444      
+00001312  223C 00000181            445          MOVE.L #Color_Boton_Izq,D1                                  ;Valor inicial X
+00001318  741E                     446          MOVE.L #R_Boton_Arriba,D2                                   ;Valor inicial Y
+0000131A  263C 000001B3            447          MOVE.L #Color_Boton_der,D3                                  ;Valor final X
+00001320  7832                     448          MOVE.L #R_Boton_Abajo,D4                                    ;Valor final Y
+00001322  7057                     449          MOVE.L #87,D0                                               ;Dibujar rectangulo boton color rojo
+00001324  4E4F                     450          TRAP #15
+00001326                           451      
+00001326                           452          *RECTANGULO COLOR AMARILLO*
+00001326  223C 0000FFFF            453          MOVE.L #AMARILLO,D1
+0000132C  7051                     454          MOVE.L #81,D0                                               ;Cambio color de relleno
+0000132E  4E4F                     455          TRAP #15
+00001330                           456      
+00001330  223C 00000181            457          MOVE.L #Color_Boton_Izq,D1                                  ;Valor inicial X
+00001336  7437                     458          MOVE.L #A_Boton_Arriba,D2                                   ;Valor inicial Y
+00001338  263C 000001B3            459          MOVE.L #Color_Boton_der,D3                                  ;Valor final X
+0000133E  784B                     460          MOVE.L #A_Boton_Abajo,D4                                    ;Valor final Y
+00001340  7057                     461          MOVE.L #87,D0                                               ;Dibujar rectangulo boton color amarillo
+00001342  4E4F                     462          TRAP #15
+00001344                           463      
+00001344                           464          *RECTANGULO COLOR VERDE*
+00001344  223C 0000FF00            465          MOVE.L #VERDE,D1
+0000134A  7051                     466          MOVE.L #81,D0                                               ;Cambio color de relleno
+0000134C  4E4F                     467          TRAP #15
+0000134E                           468          
+0000134E  223C 00000181            469          MOVE.L #Color_Boton_Izq,D1                                  ;Valor inicial X
+00001354  7450                     470          MOVE.L #V_Boton_Arriba,D2                                   ;Valor inicial Y
+00001356  263C 000001B3            471          MOVE.L #Color_Boton_der,D3                                  ;Valor final X
+0000135C  7864                     472          MOVE.L #V_Boton_Abajo,D4                                    ;Valor final Y
+0000135E  7057                     473          MOVE.L #87,D0                                               ;Dibujar rectangulo boton color verde
+00001360  4E4F                     474          TRAP #15
+00001362                           475      
+00001362                           476          *RECTANGULO COLOR NEGRO*
+00001362  7200                     477          MOVE.L #NEGRO,D1
+00001364  7051                     478          MOVE.L #81,D0                                               ;Cambio color de relleno
+00001366  4E4F                     479          TRAP #15
+00001368                           480      
+00001368  223C 00000181            481          MOVE.L #Color_Boton_Izq,D1                                  ;Valor inicial X
+0000136E  7469                     482          MOVE.L #N_Boton_Arriba,D2                                   ;Valor inicial Y
+00001370  263C 000001B3            483          MOVE.L #Color_Boton_der,D3                                  ;Valor final X
+00001376  787D                     484          MOVE.L #N_Boton_Abajo,D4                                    ;Valor final Y
+00001378  7057                     485          MOVE.L #87,D0                                               ;Dibujar rectangulo boton color negro
+0000137A  4E4F                     486          TRAP #15
+0000137C                           487      
+0000137C                           488          *RECTANGULO COLOR MARRON*
+0000137C  223C 00000080            489          MOVE.L #MARRON,D1
+00001382  7051                     490          MOVE.L #81,D0                                               ;Cambio color de relleno
+00001384  4E4F                     491          TRAP #15
+00001386                           492      
+00001386  223C 00000181            493          MOVE.L #Color_Boton_Izq,D1                                  ;Valor inicial X
+0000138C  243C 00000082            494          MOVE.L #M_Boton_Arriba,D2                                   ;Valor inicial Y
+00001392  263C 000001B3            495          MOVE.L #Color_Boton_der,D3                                  ;Valor final X
+00001398  283C 00000096            496          MOVE.L #M_Boton_Abajo,D4                                    ;Valor final Y
+0000139E  7057                     497          MOVE.L #87,D0                                               ;Dibujar rectangulo boton color marron
+000013A0  4E4F                     498          TRAP #15
+000013A2                           499      
+000013A2                           500          *RECTANGULO COLOR BLANCO*
+000013A2  223C 00FFFFFF            501          MOVE.L #BLANCO,D1
+000013A8  7051                     502          MOVE.L #81,D0                                               ;Cambio color de relleno
+000013AA  4E4F                     503          TRAP #15
+000013AC                           504      
+000013AC  223C 00000181            505          MOVE.L #Color_Boton_Izq,D1                                  ;Valor inicial X
+000013B2  243C 0000009B            506          MOVE.L #B_Boton_Arriba,D2                                   ;Valor inicial Y
+000013B8  263C 000001B3            507          MOVE.L #Color_Boton_der,D3                                  ;Valor final X
+000013BE  283C 000000AF            508          MOVE.L #B_Boton_Abajo,D4                                    ;Valor final Y
+000013C4  7057                     509          MOVE.L #87,D0                                               ;Dibujar rectangulo boton color blanco
+000013C6  4E4F                     510          TRAP #15
+000013C8                           511      
+000013C8                           512          *RECTANGULO BOTON INSTRUCCIONES*
+000013C8  223C 000000FF            513          MOVE.L #ROJO,D1
+000013CE  7051                     514          MOVE.L #81,D0                                               ;Cambio color de relleno
+000013D0  4E4F                     515          TRAP #15
+000013D2                           516      
+000013D2  223C 000001D1            517          MOVE.L #Inst_Boton_Izq,D1                                   ;Valor inicial X
+000013D8  741E                     518          MOVE.L #Inst_Boton_Arriba,D2                                ;Valor inicial Y
+000013DA  263C 00000299            519          MOVE.L #Inst_Boton_der,D3                                   ;Valor final X
+000013E0  7832                     520          MOVE.L #Inst_Boton_Abajo,D4                                 ;Valor final Y
+000013E2  7057                     521          MOVE.L #87,D0                                               ;Dibujar rectangulo boton instrucciones
+000013E4  4E4F                     522          TRAP #15
+000013E6                           523   
+000013E6  227C 0000348C            524          MOVE.L #MSJ8,A1
+000013EC  705F                     525          MOVE.L #95,D0
+000013EE  223C 000001E2            526          MOVE.L #Inst_B_txt_Izq,D1
+000013F4  7421                     527          MOVE.L #Inst_B_txt_Arriba,D2
+000013F6  4E4F                     528          TRAP #15                                                    ;Escribo el mensaje dentro del botón de instrucciones
+000013F8                           529  ******************************FIN DIBUJO ESTRUCTURA*************************************        
+000013F8                           530          
+000013F8                           531          *PARAGRAFO IMPORTANTE INICIALIZO PUNTO DONDE EMPIEZO A PINTAR FICHAS Y PISTAS
+000013F8  33FC 0014 0000300E       532          MOVE.W #Tabla_izq,POSX
+00001400  33FC 001E 00003010       533          MOVE.W #Tabla_Arriba,POSY
+00001408  0679 000A 00003010       534          ADD.W #Ficha_Gap,POSY
+00001410                           535      
+00001410  33FC 0127 00003012       536          MOVE.W #Pistas_Izq,POSPX
+00001418  33FC 001E 00003014       537          MOVE.W #Pistas_Arriba,POSPY
+00001420  0679 000A 00003014       538          ADD.W #Ficha_Gap,POSPY
+00001428                           539  
+00001428                           540      
+00001428                           541  *#################################COMIENZO DEL JUEGO####################################           
+00001428  4EB9 00001986            542  NI      JSR INIRND                                                  ;Inicializa la semilla (solo una vez por ejecución).
+0000142E  207C 00003000            543          MOVE.L #COMB,A0                                             ;Indico donde guardaré la combinación ganadora.
+00001434  7801                     544          MOVE.L #1, D4                                               ;inizializo las veces que obtengo un numero aleatorio
+00001436  203C 00000005            545  OTRO    MOVE.L #RANGO,D0        
+0000143C  4EB9 00001992            546          JSR LAB_RND                                                 ;Obtiene un valor entre 0-RANGO
+00001442  0C39 0001 00003024       547          CMP.B #1,REPET
+0000144A  6700 001E                548          BEQ GUARDA
+0000144E  7A01                     549          MOVE.L #1, D5
+00001450  207C 00003000            550  NREP    MOVE.L #COMB, A0
+00001456  B8BC 00000001            551          CMP.L #1, D4
+0000145C  6700 000C                552          BEQ GUARDA
+00001460  B018                     553  COMPS   CMP.B (A0)+, D0
+00001462  67D2                     554          BEQ OTRO
+00001464  5285                     555          ADD.L #1, D5
+00001466  BA84                     556          CMP.L D4, D5
+00001468  66F6                     557          BNE COMPS
+0000146A                           558          
+0000146A  10C0                     559  GUARDA  MOVE.B D0,(A0)+                                             ;Mueve el número aleatorio a COMB
+0000146C  B8BC 00000006            560          CMP.L #6,D4             
+00001472  6700 0008                561          BEQ OTROTURNO                                               ;Si ya ha obtenido los 4 números, salta. 
+00001476  5284                     562          ADD.L #1, D4
+00001478  4EF8 1436                563          JMP OTRO                                                    ;Y si todavía no, obtiene el siguiente número.     
+0000147C                           564  
+0000147C                           565  OTROTURNO    
+0000147C                           566  ******************************OBTENER FICHAS TURNO***************************************
+0000147C  13FC 0000 0000300C       567          MOVE.B #0,CONTF                                             ;inicializo el "contador de numero de fichas introducidas en el turno actual".
+00001484  207C 00003006            568          MOVE.L #COMBU,A0                                            ;indico la dirección de la primera posición de la combinación introducida por el usuario.
+0000148A                           569  
+0000148A  7200                     570  SIGUEOB MOVE.L #0,D1 
+0000148C  703D                     571          MOVE.L #61,D0                                               ;check mouse state
+0000148E  4E4F                     572          TRAP #15    
+00001490  B03C 0001                573          CMP.B #1,D0
+00001494  65F4                     574          BCS SIGUEOB
+00001496                           575      
+00001496  B27C 0181                576          CMP.W #Color_Boton_Izq,D1
+0000149A  6500 0128                577          BCS CHKINST
+0000149E  B27C 01B3                578          CMP.W #Color_Boton_der,D1
+000014A2  6200 0120                579          BHI CHKINST
+000014A6                           580          
+000014A6  4841                     581          SWAP D1
+000014A8                           582          
+000014A8  B27C 001E                583          CMP.W #R_Boton_Arriba,D1
+000014AC  6500 01FE                584          BCS RELAJA
+000014B0  B27C 0032                585          CMP.W #R_Boton_Abajo,D1
+000014B4  6200 0022                586          BHI CHK_A
+000014B8  223C 000000FF            587          MOVE.L #ROJO,D1
+000014BE  7051                     588          MOVE.L #81,D0                                               ;Cambio color de relleno a rojo ya que ha sido el boton seleccionado
+000014C0  4E4F                     589          TRAP #15
+000014C2  4EB9 000019E0            590          JSR PFICHAS                                                 ;subrutina pintafichas
+000014C8  10FC 0000                591          MOVE.B #0,(A0)+
+000014CC  5239 0000300C            592          ADD.B #1,CONTF                                              ;aumento el contador de numero de fichas introducidas en la fila actual. 
+000014D2  4EF9 000016AC            593          JMP RELAJA
+000014D8                           594      
+000014D8  B27C 0037                595  CHK_A   CMP.W #A_Boton_Arriba,D1
+000014DC  6500 01CE                596          BCS RELAJA
+000014E0  B27C 004B                597          CMP.W #A_Boton_Abajo,D1
+000014E4  6200 0022                598          BHI CHK_V
+000014E8  223C 0000FFFF            599          MOVE.L #AMARILLO,D1
+000014EE  7051                     600          MOVE.L #81,D0                                               ;Cambio color de relleno
+000014F0  4E4F                     601          TRAP #15
+000014F2  4EB9 000019E0            602          JSR PFICHAS
+000014F8  10FC 0001                603          MOVE.B #1,(A0)+ 
+000014FC  5239 0000300C            604          ADD.B #1,CONTF 
+00001502  4EF9 000016AC            605          JMP RELAJA 
+00001508                           606          
+00001508  B27C 0050                607  CHK_V   CMP.W #V_Boton_Arriba,D1
+0000150C  6500 019E                608          BCS RELAJA
+00001510  B27C 0064                609          CMP.W #V_Boton_Abajo,D1
+00001514  6200 0022                610          BHI CHK_N
+00001518  223C 0000FF00            611          MOVE.L #VERDE,D1
+0000151E  7051                     612          MOVE.L #81,D0                                               ;Cambio color de relleno
+00001520  4E4F                     613          TRAP #15
+00001522  4EB9 000019E0            614          JSR PFICHAS
+00001528  10FC 0002                615          MOVE.B #2,(A0)+
+0000152C  5239 0000300C            616          ADD.B #1,CONTF
+00001532  4EF9 000016AC            617          JMP RELAJA
+00001538                           618  
+00001538  B27C 0069                619  CHK_N   CMP.W #N_Boton_Arriba,D1
+0000153C  6500 016E                620          BCS RELAJA
+00001540  B27C 007D                621          CMP.W #N_Boton_Abajo,D1
+00001544  6200 001E                622          BHI CHK_M
+00001548  7200                     623          MOVE.L #NEGRO,D1
+0000154A  7051                     624          MOVE.L #81,D0                                               ;Cambio color de relleno
+0000154C  4E4F                     625          TRAP #15
+0000154E  4EB9 000019E0            626          JSR PFICHAS
+00001554  10FC 0003                627          MOVE.B #3,(A0)+
+00001558  5239 0000300C            628          ADD.B #1,CONTF
+0000155E  4EF9 000016AC            629          JMP RELAJA
+00001564                           630  
+00001564  B27C 0082                631  CHK_M   CMP.W #M_Boton_Arriba,D1
+00001568  6500 0142                632          BCS RELAJA
+0000156C  B27C 0096                633          CMP.W #M_Boton_Abajo,D1
+00001570  6200 0022                634          BHI CHK_B
+00001574  223C 00000080            635          MOVE.L #MARRON,D1
+0000157A  7051                     636          MOVE.L #81,D0                                               ;Cambio color de relleno
+0000157C  4E4F                     637          TRAP #15
+0000157E  4EB9 000019E0            638          JSR PFICHAS
+00001584  10FC 0004                639          MOVE.B #4,(A0)+
+00001588  5239 0000300C            640          ADD.B #1,CONTF
+0000158E  4EF9 000016AC            641          JMP RELAJA
+00001594                           642  
+00001594  B27C 009B                643  CHK_B   CMP.W #B_Boton_Arriba,D1
+00001598  6500 0112                644          BCS RELAJA
+0000159C  B27C 00AF                645          CMP.W #B_Boton_Abajo,D1
+000015A0  6200 010A                646          BHI RELAJA
+000015A4  223C 00FFFFFF            647          MOVE.L #BLANCO,D1
+000015AA  7051                     648          MOVE.L #81,D0                                               ;Cambio color de relleno
+000015AC  4E4F                     649          TRAP #15
+000015AE  4EB9 000019E0            650          JSR PFICHAS
+000015B4  10FC 0005                651          MOVE.B #5,(A0)+
+000015B8  5239 0000300C            652          ADD.B #1,CONTF
+000015BE  4EF9 000016AC            653          JMP RELAJA       
+000015C4                           654  
+000015C4  B27C 01D1                655  CHKINST CMP.W #Inst_Boton_Izq,D1
+000015C8  6500 00E2                656          BCS RELAJA
+000015CC  B27C 0299                657          CMP.W #Inst_Boton_Der,D1
+000015D0  6200 00DA                658          BHI RELAJA
+000015D4  4841                     659          SWAP D1
+000015D6  B27C 001E                660          CMP.W #Inst_Boton_Arriba,D1
+000015DA  6500 00D0                661          BCS RELAJA
+000015DE  B27C 0032                662          CMP.W #Inst_Boton_Abajo,D1
+000015E2  6200 00C8                663          BHI RELAJA
+000015E6                           664          
+000015E6  223C 000000FF            665          MOVE.L #ROJO,D1
+000015EC  7051                     666          MOVE.L #81,D0                                               ;El botón de instrucciones ha sido pulsado, me dispongo a cambiar el boton. 
+000015EE  4E4F                     667          TRAP #15
+000015F0                           668      
+000015F0  223C 000001D1            669          MOVE.L #Inst_Boton_Izq,D1                                   ;Valor inicial X
+000015F6  741E                     670          MOVE.L #Inst_Boton_Arriba,D2                                ;Valor inicial Y
+000015F8  263C 00000299            671          MOVE.L #Inst_Boton_der,D3                                   ;Valor final X
+000015FE  7832                     672          MOVE.L #Inst_Boton_Abajo,D4                                 ;Valor final Y
+00001600  7057                     673          MOVE.L #87,D0                                               ;Dibujar rectangulo de boton instrucciones (superpuesto al anterior)
+00001602  4E4F                     674          TRAP #15
+00001604                           675          
+00001604                           676          *Según el que haya, cambio del boton de "Ver Instrucciones" por el de "Cerrar Instrucciones" o viceversa.
+00001604  0C39 0001 00003027       677          CMP.B  #1,BINST                                             ;si la bandera de las instrucciones está levantada, las cierro.
+0000160C  6600 0050                678          BNE ABREINS
+00001610  227C 0000348C            679          MOVE.L #MSJ8,A1                                 
+00001616  705F                     680          MOVE.L #95,D0
+00001618  223C 000001E2            681          MOVE.L #Inst_B_txt_Izq,D1
+0000161E  7421                     682          MOVE.L #Inst_B_txt_Arriba,D2
+00001620  4E4F                     683          TRAP #15                                                    ;En el boton de instrucciones escribo "Ver instrucciones"
+00001622  7200                     684          MOVE.L #NEGRO,D1
+00001624  7050                     685          MOVE.L #80,D0                                               ;Cambio color de pluma
+00001626  4E4F                     686          TRAP #15
+00001628  7200                     687          MOVE.L #NEGRO,D1
+0000162A  7051                     688          MOVE.L #81,D0                                               ;Cambio color de relleno
+0000162C  4E4F                     689          TRAP #15
+0000162E  223C 000001D1            690          MOVE.L #Texto_info_Izq,D1                                   ;Valor inicial X
+00001634  7446                     691          MOVE.L #Texto_info_Arriba,D2                                ;Valor inicial Y
+00001636  263C 00000429            692          MOVE.L #Texto_info_Der,D3                                   ;Valor final X
+0000163C  283C 000001E0            693          MOVE.L #Texto_info_Abajo,D4                                 ;Valor final Y
+00001642  7057                     694          MOVE.L #87,D0                                               ;Dibujar rectangulo para borrar el texto de las instrucciones
+00001644  4E4F                     695          TRAP #15
+00001646  13FC 0000 00003027       696          MOVE.B #0,BINST                                             ;BAJO BANDERA
+0000164E  223C 0000FF00            697          MOVE.L #VERDE,D1
+00001654  7050                     698          MOVE.L #80,D0                                               ;vuelvo a dejar el pen color como estaba
+00001656  4E4F                     699          TRAP #15
+00001658  4EF9 000016AC            700          JMP RELAJA
+0000165E                           701      
+0000165E  13FC 0001 00003027       702  ABREINS MOVE.B #1,BINST                                             ;LEVANTO BANDERA DE INSTRUCCIONES ACTIVAS
+00001666  227C 0000349E            703          MOVE.L #MSJ9,A1
+0000166C  705F                     704          MOVE.L #95,D0
+0000166E  223C 000001E2            705          MOVE.L #Inst_B_txt_Izq,D1
+00001674  7421                     706          MOVE.L #Inst_B_txt_Arriba,D2
+00001676  4E4F                     707          TRAP #15                                                    ;En el boton de instrucciones escribo "Cerrar instrucciones"
+00001678  7200                     708          MOVE.L #NEGRO,D1
+0000167A  7051                     709          MOVE.L #81,D0                                               ;Cambio color de relleno
+0000167C  4E4F                     710          TRAP #15
+0000167E  7600                     711          MOVE.L #0,D3
+00001680  227C 00003041            712          MOVE.L #MSJ1,A1                                             ;pongo A1 apuntando a la primera posición del mensaje
+00001686  223C 000001D1            713          MOVE.L #Texto_Info_Izq,D1
+0000168C  7446                     714          MOVE.L #Texto_Info_Arriba,D2
+0000168E  B63C 000E                715  ESCRIBE CMP.B #14,D3                                                ;ha escrito ya las 14 lineas del mensaje?
+00001692  6700 0018                716          BEQ RELAJA
+00001696  705F                     717          MOVE.L #95,D0
+00001698  4E4F                     718          TRAP #15                                                    ;escribe hasta encontrar un cero.
+0000169A  5283                     719          ADD.L #1,D3                                                 ;aumento el contador.
+0000169C  D3FC 00000041            720          ADD.L #65,A1                                                ;APUNTO A LA SIGUIENTE LINEA (cada linea ocupa 64 bytes)
+000016A2  0682 00000014            721          ADD.L #Texto_Info_Gap,D2                                    ;añado un espacio entre lineas
+000016A8  4EF8 168E                722          JMP ESCRIBE
+000016AC                           723  
+000016AC  7200                     724  RELAJA  MOVE.L #0,D1
+000016AE  703D                     725          MOVE.L #61,D0                                               ;miro el estado del ratón
+000016B0  4E4F                     726          TRAP #15
+000016B2  B03C 0000                727          CMP.B #0,D0                                                 ;¿sigue pulsado el ratón?
+000016B6  66F4                     728          BNE RELAJA
+000016B8                           729      
+000016B8  1239 0000300C            730          MOVE.B CONTF,D1
+000016BE  B239 00003022            731          CMP.B NBOLAS,D1
+000016C4  6500 FDC4                732          BCS SIGUEOB                                                 ;si todavía no tengo la cantidad de fichas que indique NBOLAS sigo obteniéndolas
+000016C8                           733  ************************FIN OBTENER FICHAS TURNO***********************************
+000016C8                           734  
+000016C8                           735  
+000016C8                           736  ************************COMPROBACION FICHAS TURNO********************************** 
+000016C8                           737          *Comprobación masiva inicial (PASO 1)   
+000016C8  207C 00003000            738          MOVE.L #COMB, A0                                            ; Busco direccion inicial solucion
+000016CE  227C 00003006            739          MOVE.L #COMBU, A1                                           ; Busco direccion inicial combinacion usuario
+000016D4  7001                     740          MOVE.L #1,D0                                                ; inicializo un contador
+000016D6                           741          
+000016D6                           742          
+000016D6  B308                     743  CMPTODO CMP.B (A0)+,(A1)+                                           ; Comparo las primeras cuatro bolas tanto de la solucion como de las introducidas por el usuario
+000016D8  6600 0012                744          BNE CMP11                                                   ; Cuando encuentre una que ya no es igual pasaré a compararlas una a una
+000016DC  B039 00003022            745          CMP.B NBOLAS,D0                                             ; Si son iguales miro si sólo hay NBOLAS 
+000016E2  6700 016C                746          BEQ GANAR                                                   ; Si es así ya he ganado
+000016E6  5200                     747          ADD.B #1,D0
+000016E8  4EF8 16D6                748          JMP CMPTODO
+000016EC                           749          
+000016EC                           750          *Comprobación en paralelo (PASO 2)      
+000016EC  0C39 0001 00003023       751  CMP11   CMP.B #1,TURNO                                              ;Compruebo si al usuario le quedan más turnos.
+000016F4  6300 019C                752          BLS PERDER                                                  ; Si no es así, ha perdido
+000016F8  207C 00003000            753          MOVE.L #COMB, A0                                            ; Vuelvo a buscar la direccion inicial de la solucion
+000016FE  227C 00003006            754          MOVE.L #COMBU, A1                                           ; Vuelvo a buscar la direccion inicial de la combinacion del usuario
+00001704  267C 00003016            755          MOVE.L #CONT, A3                                            ; Busco la direccion inicial de los contadores que me indican si las posiciones de la solucion encontraron pareja
+0000170A  287C 0000301C            756          MOVE.L #CONTU, A4                                           ; Lo mismo para las posiciones de la combinacion de usuario
+00001710  103C 0000                757          MOVE.B #0, D0                                               ; Inicializo un contador que me dirá la bola que estoy comprobando
+00001714                           758          
+00001714  1C39 00003022            759          MOVE.B NBOLAS, D6
+0000171A  5280                     760  SIG11   ADD.L #1, D0                                                ; Añado 1 al contador 
+0000171C  B308                     761          CMP.B (A0)+, (A1)+                                          ; Compruebo las bolas a las que apunta el contador
+0000171E  6600 0010                762          BNE MAL             
+00001722  16FC 0001                763  BIEN    MOVE.B #1, (A3)+                                            ; Si son iguales actualizo sus contadores indicandolo y voy a ver si era la ultima
+00001726  18FC 0001                764          MOVE.B #1, (A4)+
+0000172A  4EF9 00001738            765          JMP CFIN
+00001730  16FC 0000                766  MAL     MOVE.B #0, (A3)+                                            ; Si no eran iguales tambien actualizo sus contadores
+00001734  18FC 0000                767          MOVE.B #0, (A4)+   
+00001738  B006                     768  CFIN    CMP.B D6, D0                                                ; Compruebo si era la ultima bola a comprobar
+0000173A  66DE                     769          BNE SIG11                                                   ; si no lo era compruebo la siguiente
+0000173C                           770          
+0000173C                           771          *Comprobación en abanico (PASO 3)
+0000173C  207C 00003000            772          MOVE.L #COMB, A0                                            ; Vuelvo a buscar la direccion inicial de la solucion
+00001742  247C 00003016            773          MOVE.L #CONT, A2                                            ; Vuelvo a buscar la direccion inicial de contador de estado de la solución
+00001748  103C 0000                774          MOVE.B #0, D0                                               ; Inicializo el contador que nos indicara la posición de la solución que se está comprobando (cont abanico sup)
+0000174C                           775          
+0000174C                           776          *(Abanico nivel superior)      
+0000174C  1218                     777  ABAS    MOVE.B (A0)+, D1                                            ; Cargo el dato de la solución 
+0000174E  161A                     778          MOVE.B (A2)+, D3                                            ; Cargo el dato del contador de estado de la solución
+00001750  227C 00003006            779          MOVE.L #COMBU, A1                                           ; Vuelvo a buscar la direccion inicial de la combinación del usuario
+00001756  267C 0000301C            780          MOVE.L #CONTU, A3                                           ; Vuelvo a buscar la direccion inicial de contador de estado de la combinacion del usuario
+0000175C  7A00                     781          MOVE.L #0, D5                                               ; Inicializo el contador que nos indicara la posición de la combinación del usuario que se está comprobando (cont abanico inf)
+0000175E  B63C 0001                782          CMP.B #1, D3                                                ; Compruebo si esta parte de la solución ya estaba asignada a una de la combinacion del usuario
+00001762  6700 0026                783          BEQ FINABAS                                                 ; Si es así miro si era la última de la solucion
+00001766                           784  
+00001766                           785          *(Abanico nivel inferior)  
+00001766  5285                     786  ABAI    ADD.L #1, D5                                                ; Incremento el contador del abanico inferior
+00001768  1419                     787          MOVE.B (A1)+, D2                                            ; Cargo el dato de la combinación del usuario
+0000176A  0C13 0001                788          CMP.B #1, (A3)                                              ; Compruebo si la bola de la solución ya está en común con una de la solución del usuario
+0000176E  6700 0012                789          BEQ FINABAI                                                 ; Si es así no compruebo y voy directamente a ver si era la ultima
+00001772  B401                     790          CMP.B D1, D2                                                ; Compruebo si las bolas que estoy comparando son iguales
+00001774  6600 000C                791          BNE FINABAI                                                 ; Si no son iguales voy a buscar la siguiente bola de la combinacion del usuario
+00001778  16FC 0001                792          MOVE.B #1, (A3)+                                            ; Si son iguales lo indico en el contador de estado de la combinacion del usuario
+0000177C  4EF9 0000178A            793          JMP FINABAS                                                 ; Compruebo si era la última comprobacion necesaria
+00001782                           794  
+00001782  061B 0000                795  FINABAI ADD.B #0, (A3)+                                             ; Muevo el contador de estado de la combinacion de usuario a la siguiente posicion
+00001786  BA06                     796          CMP.B D6, D5                                                ; Compruebo si era la última bola
+00001788  66DC                     797          BNE ABAI                                                    ; Si no lo era paso a la siguiente bola de la combinacion del usuario
+0000178A                           798          
+0000178A  5200                     799  FINABAS ADD.B #1, D0                                                ; Incremento el contador de abanico superior
+0000178C  B006                     800          CMP.B D6, D0                                                ; Compruebo si era la última bola de la solucion
+0000178E  66BC                     801          BNE ABAS                                                    ; Si no lo era paso a la siguiente bola de la solucion
+00001790                           802  
+00001790                           803          *Total Blancas y Negras
+00001790  7000                     804          MOVE.L #0, D0                                               ; Creo un contador que indique el final del bucle
+00001792  207C 00003016            805          MOVE.L #CONT, A0                                            ; Busco la direccion inicial de los contadores de la solucion 
+00001798  227C 0000301C            806          MOVE.L #CONTU, A1                                           ; Lo mismo para las posiciones de la combinacion de usuario
+0000179E  7200                     807          MOVE.L #0, D1                                               ; Inicializo los contadores donde guardaré la cantidad de contadores activos en cada uno
+000017A0  7400                     808          MOVE.L #0, D2                                               ; Para después calcular el número de blancas y negras
+000017A2                           809          
+000017A2  D218                     810  BNCONT  ADD.B (A0)+, D1                                             ; Sumo cuantas bolas estan bien posicionadas en una variable
+000017A4  D419                     811          ADD.B (A1)+, D2                                             ; Sumo cuantas bolas estan bien y mal posicionadas en otra variable
+000017A6  5200                     812          ADD.B #1, D0                                                ; Incrementa el contador 
+000017A8  B086                     813          CMP.L D6, D0                                                ; Comprueba si era la ultima posición a comprobar
+000017AA  66F6                     814          BNE BNCONT                                                  ; Si no es así siguie sumando        
+000017AC  9481                     815          SUB.L D1, D2                                                ; Resto las que están bien del total para obtener las mal posicionadas      
+000017AE                           816          
+000017AE  13C1 00003025            817          MOVE.B D1,TOTALN
+000017B4  13C2 00003026            818          MOVE.B D2,TOTALB
+000017BA                           819  ************************FIN COMPROBACION FICHAS TURNO**********************************
+000017BA                           820          
+000017BA                           821          *Preparo nuevo turno        
+000017BA  5339 00003023            822          SUB.B #1,TURNO
+000017C0                           823          
+000017C0                           824          *Preparo sitios a pintar de nuevo turno
+000017C0  7060                     825          MOVE.L #96,D0                                               ;obtengo la posición actual del cursor
+000017C2  4E4F                     826          TRAP #15
+000017C4                           827          
+000017C4  13FC 0000 0000300D       828          MOVE.B #0,CONTP                                             ;Pongo a cero el contador de pistas pintadas.
+000017CC  33FC 0127 00003012       829          MOVE.W #Pistas_Izq,POSPX                                    ;REINICIALIZO LEFT X de pistas
+000017D4  33C2 00003014            830          MOVE.W D2,POSPY                                             ;Reinicializo Valor inicial Y de pistas (guardo la posición actual de Y, no la del próximo turno ya que ahora sacaré las pistas de ESTE turno)
+000017DA                           831          
+000017DA  33FC 0014 0000300E       832          MOVE.W #Tabla_Izq,POSX                                      ;REINICIALIZO LEFT X
+000017E2  0642 001E                833          ADD.W #Ficha_Altura,D2                                      ;pre-Valor final Y   
+000017E6  0642 000A                834          ADD.W #Ficha_Gap,D2                                         ;Valor final Y
+000017EA  33C2 00003010            835          MOVE.W D2,POSY                                              ;(la Y se queda apuntando a la que será la parte de arriba de la siguiente ficha)
+000017F0                           836          
+000017F0                           837  
+000017F0                           838  ****************************MOSTRAR PISTAS TURNO***************************************
+000017F0  0C39 0000 00003025       839  PISTASN CMP.B #0,TOTALN
+000017F8  6700 0024                840          BEQ PISTASB
+000017FC  4EB9 00001A36            841          JSR SALTAL                                                  ;COMPRUEBO SI DEBO SALTAR LINEA
+00001802  7200                     842          MOVE.L #NEGRO,D1
+00001804  7051                     843          MOVE.L #81,D0                                               ;Cambio color de relleno
+00001806  4E4F                     844          TRAP #15
+00001808  4EB9 00001A0C            845          JSR PPISTAS
+0000180E  5239 0000300D            846          ADD.B #1,CONTP
+00001814  5339 00003025            847          SUB.B #1,TOTALN
+0000181A  4EF8 17F0                848          JMP PISTASN
+0000181E                           849          
+0000181E  0C39 0000 00003026       850  PISTASB CMP.B #0,TOTALB
+00001826  6700 FC54                851          BEQ OTROTURNO
+0000182A  4EB9 00001A36            852          JSR SALTAL                                                  ;COMPRUEBO SI DEBO SALTAR LINEA
+00001830  223C 00FFFFFF            853          MOVE.L #BLANCO,D1
+00001836  7051                     854          MOVE.L #81,D0                                               ;Cambio color de relleno
+00001838  4E4F                     855          TRAP #15
+0000183A  4EB9 00001A0C            856          JSR PPISTAS
+00001840  5239 0000300D            857          ADD.B #1,CONTP
+00001846  5339 00003026            858          SUB.B #1,TOTALB
+0000184C  4EF8 181E                859          JMP PISTASB
+00001850                           860  ****************************FIN MOSTRAR PISTAS TURNO***************************************
+00001850                           861  
+00001850                           862  
+00001850                           863  ****************************CONCLUSIÓN DE LA PARTIDA***************************************     
+00001850  43F9 00003028            864  GANAR   LEA GWin,A1                                                 ;reproducir el sonido de victoria.
+00001856  7049                     865          MOVE.L #73,D0
+00001858  4E4F                     866          TRAP #15
+0000185A  223C 00808080            867          MOVE.L #GRIS,D1
+00001860  7051                     868          MOVE.L #81,D0
+00001862  4E4F                     869          TRAP #15
+00001864  7232                     870          MOVE.L #Popup_Izq,D1
+00001866  7428                     871          MOVE.L #Popup_Arriba,D2
+00001868  263C 00000226            872          MOVE.L #Popup_der,D3
+0000186E  283C 000001B8            873          MOVE.L #Popup_Abajo,D4
+00001874  7057                     874          MOVE.L #87,D0
+00001876  4E4F                     875          TRAP #15
+00001878                           876          
+00001878  227C 00003435            877          MOVE.L #MSJ5,A1                                             ;Saco un mensaje de enhorabuena
+0000187E  705F                     878          MOVE.L #95,D0
+00001880  7250                     879          MOVE.L #Popup_txt1_Izq,D1
+00001882  745A                     880          MOVE.L #Popup_txt1_Arriba,D2
+00001884  4E4F                     881          TRAP #15
+00001886                           882          
+00001886  4EB9 00001A5C            883          JSR FINAL                                                   ;salto a la subrutina que me dibuja la solucion
+0000188C  4EF9 000018CE            884          JMP OTRA
+00001892                           885          
+00001892  43F9 00003034            886  PERDER  LEA GOver,A1                                                ;reproducir el sonido de game over.
+00001898  7049                     887          MOVE.L #73,D0
+0000189A  4E4F                     888          TRAP #15
+0000189C  223C 00808080            889          MOVE.L #GRIS,D1
+000018A2  7051                     890          MOVE.L #81,D0
+000018A4  4E4F                     891          TRAP #15
+000018A6  7232                     892          MOVE.L #Popup_Izq,D1
+000018A8  7428                     893          MOVE.L #Popup_Arriba,D2
+000018AA  263C 00000226            894          MOVE.L #Popup_der,D3
+000018B0  283C 000001B8            895          MOVE.L #Popup_Abajo,D4
+000018B6  7057                     896          MOVE.L #87,D0
+000018B8  4E4F                     897          TRAP #15
+000018BA                           898          
+000018BA  227C 00003450            899          MOVE.L #MSJ6,A1
+000018C0  705F                     900          MOVE.L #95,D0
+000018C2  7250                     901          MOVE.L #Popup_txt1_Izq,D1
+000018C4  745A                     902          MOVE.L #Popup_txt1_Arriba,D2
+000018C6  4E4F                     903          TRAP #15
+000018C8                           904          
+000018C8  4EB9 00001A5C            905          JSR FINAL
+000018CE                           906  
+000018CE  223C 00808080            907  OTRA    MOVE.L #GRIS,D1
+000018D4  7051                     908          MOVE.L #81,D0
+000018D6  4E4F                     909          TRAP #15
+000018D8  227C 00003476            910          MOVE.L #MSJ7,A1                                             ;saco mensaje pidiendo volver a jugar
+000018DE  705F                     911          MOVE.L #95,D0
+000018E0  7250                     912          MOVE.L #Popup_txt3_Izq,D1
+000018E2  243C 00000122            913          MOVE.L #Popup_txt3_Arriba,D2
+000018E8  4E4F                     914          TRAP #15
+000018EA                           915      
+000018EA  223C 000000FF            916          MOVE.L #ROJO,D1
+000018F0  7051                     917          MOVE.L #81,D0                                               ;set fill color del boton
+000018F2  4E4F                     918          TRAP #15
+000018F4                           919          
+000018F4  7250                     920          MOVE.L #Si_Boton_Izq,D1                                     ;Dibujo boton
+000018F6  243C 00000140            921          MOVE.L #Popup_B_txt3_Arriba,D2
+000018FC  7678                     922          MOVE.L #Si_Boton_der,D3
+000018FE  283C 00000154            923          MOVE.L #Popup_B_txt3_Abajo,D4
+00001904  7057                     924          MOVE.L #87,D0
+00001906  4E4F                     925          TRAP #15
+00001908  227C 0000342F            926          MOVE.L #MSJSI,A1                                            ;Pongo el mensaje del boton "Si"
+0000190E  705F                     927          MOVE.L #95,D0
+00001910  725F                     928          MOVE.L #Si_txt_Izq,D1
+00001912  243C 00000143            929          MOVE.L #Si_txt_Arriba,D2
+00001918  4E4F                     930          TRAP #15
+0000191A                           931      
+0000191A  727D                     932          MOVE.L #No_Boton_Izq,D1                                     ;Dibujo el otro boton
+0000191C  243C 00000140            933          MOVE.L #Popup_B_txt3_Arriba,D2
+00001922  263C 000000A5            934          MOVE.L #No_Boton_der,D3
+00001928  283C 00000154            935          MOVE.L #Popup_B_txt3_Abajo,D4
+0000192E  7057                     936          MOVE.L #87,D0
+00001930  4E4F                     937          TRAP #15
+00001932  227C 00003432            938          MOVE.L #MSJNO,A1                                            ;pongo el mensaje del botón "No"
+00001938  705F                     939          MOVE.L #95,D0
+0000193A  223C 0000008C            940          MOVE.L #No_txt_Izq,D1
+00001940  243C 00000143            941          MOVE.L #No_txt_Arriba,D2
+00001946  4E4F                     942          TRAP #15
+00001948                           943          
+00001948  7200                     944  OTRAP   MOVE.L #0,D1 
+0000194A  703D                     945          MOVE.L #61,D0                                               ;check mouse state
+0000194C  4E4F                     946          TRAP #15
+0000194E                           947      
+0000194E  B03C 0001                948          CMP.B #1,D0                                                 ;Está pulsado?
+00001952  65F4                     949          BCS OTRAP                                                   ;Si no es así sigo comprobando
+00001954                           950      
+00001954  4841                     951          SWAP D1
+00001956  B27C 0140                952          CMP.W #Popup_B_txt3_Arriba,D1
+0000195A  65EC                     953          BCS OTRAP
+0000195C  B27C 0154                954          CMP.W #Popup_B_txt3_Abajo,D1
+00001960  62E6                     955          BHI OTRAP
+00001962                           956      
+00001962  4841                     957          SWAP D1
+00001964  B27C 0050                958          CMP.W #Si_Boton_Izq,D1
+00001968  65DE                     959          BCS OTRAP
+0000196A  B27C 0078                960          CMP.W #Si_Boton_Der,D1
+0000196E  6200 0006                961          BHI OTRANO
+00001972  4EF8 1000                962          JMP START                                                   ;Salto al principio
+00001976                           963      
+00001976  B27C 007D                964  OTRANO  CMP.W #No_Boton_Izq,D1
+0000197A  65CC                     965          BCS OTRAP
+0000197C  B27C 00A5                966          CMP.W #No_Boton_Der,D1
+00001980  62C6                     967          BHI OTRAP        
+00001982                           968                                                                      ;No hacemos nada
+00001982                           969           
+00001982                           970  *******************************FIN CONCLUSIÓN DE LA PARTIDA********************************
+00001982                           971  *####################################FIN DEL JUEGO#########################################
+00001982  FFFF FFFF                972  FIN     SIMHALT
+00001986                           973  
+00001986                           974  
+00001986                           975  ******************DEFINICIÓN DE SUBRUTINAS Y RESERVADO DE MEMORIA**************************
+00001986                           976  *ALGORITMO (NO TOCAR):  Necesita inicializar la semilla, PRNL, con un long, y devuelve en D0 el número pseudoaleatorio 16 bits
+00001986  =00000005                977  RANGO   EQU 5
+00001986  7008                     978  INIRND  MOVE.L #8,D0           
+00001988  4E4F                     979          TRAP #15                ;Esta subrutina inicializa la semilla a partir del reloj
+0000198A  23C1 000019DC            980          MOVE.L D1,PRNL          ;En D1 obtenemos las centesimas de segundo desde media noche
+00001990  4E75                     981          RTS
+00001992  48E7 7000                982  LAB_RND MOVEM.L D1-D3,-(A7)     ;guarda registros utilizados
+00001996  2200                     983          MOVE.L D0,D1
+00001998  5281                     984          ADD.L #1,D1             ;calculamos el rango para un valor más (luego lo eliminamos)
+0000199A  203C 0000FFFF            985          MOVE.L #$FFFF,D0
+000019A0  80C1                     986          DIVU D1,D0              ;obtiene el factor de escala rango
+000019A2  C0BC 0000FFFF            987          AND.L #$FFFF,D0         ;elimina resto
+000019A8  5280                     988          ADD.L #1,D0             ;sumamos 1 al factor de escala para eliminar el posible valor de más
+000019AA  2600                     989          MOVE.L D0,D3            ;pasamos factor de escala a D3
+000019AC  2039 000019DC            990          MOVE.L  PRNL,D0         ;get current seed longword
+000019B2  72AF                     991          MOVEQ   #$AF-$100,d1    ;set EOR value
+000019B4  7413                     992          MOVEQ       #19,d2      ;do this 19 times
+000019B6  D080                     993  Ninc0   ADD.L       d0,d0       ;shift Izq 1 bit
+000019B8  6402                     994          BCC.S       Ninc1       ;if bit not set skip feedback
+000019BA  B300                     995          EOR.B       D1,D0       ;do Galois LFSR feedback
+000019BC  5342                     996  Ninc1   SUBQ #1,D2
+000019BE  66F6                     997          BNE Ninc0               ;loop
+000019C0  23C0 000019DC            998          MOVE.L  D0,PRNL         ;save back to seed longword
+000019C6  4840                     999          SWAP D0                 ;Obtiene la palabra alta
+000019C8  C0BC 0000FFFF           1000          AND.L #$FFFF,D0         ;Se queda con esa palabra 0-65535
+000019CE  80C3                    1001          DIVU D3,D0              ;aplicamos factor de escala      
+000019D0  C0BC 0000FFFF           1002          AND.L #$FFFF,D0         ;Se queda con el cociente (solo 16 bits)
+000019D6  4CDF 000E               1003          MOVEM.L (A7)+,D1-D3
+000019DA  4E75                    1004          RTS
+000019DC                          1005  PRNL    DS.L 1                  ;Esta variable global sirve para el funcionamiento del algoritmo RANDOM
+000019E0                          1006  *FIN ALGORITMO
+000019E0                          1007  
+000019E0                          1008  *Subrutina que pinta la ficha segun la posición actual del cursor.
+000019E0  3239 0000300E           1009  PFICHAS MOVE.W POSX,D1
+000019E6  3439 00003010           1010          MOVE.W POSY,D2
+000019EC  7056                    1011          MOVE.L #86,D0
+000019EE  4E4F                    1012          TRAP #15
+000019F0  0641 000A               1013          ADD.W #Ficha_Gap,D1                                         ;añado el gap a la izquierda de la ficha, LEFT X   
+000019F4  3601                    1014          MOVE.W D1,D3
+000019F6  0643 001E               1015          ADD.W #Ficha_Anchura,D3                                     ;RIGHT X
+000019FA  3802                    1016          MOVE.W D2,D4
+000019FC  0644 001E               1017          ADD.W #Ficha_Altura,D4                                      ;Valor final Y    
+00001A00  7058                    1018          MOVE.L #88,D0                                               ;draw ellipse
+00001A02  4E4F                    1019          TRAP #15       
+00001A04  33C3 0000300E           1020          MOVE.W D3,POSX                                              ;muevo la posición X donde ha terminado esta ficha a la que será la inicial de la siguiente.     
+00001A0A  4E75                    1021          RTS
+00001A0C                          1022  *Subrutina que pinta la pista segun la posición actual del cursor.
+00001A0C  3239 00003012           1023  PPISTAS MOVE.W POSPX,D1
+00001A12  3439 00003014           1024          MOVE.W POSPY,D2
+00001A18  7056                    1025          MOVE.L #86,D0
+00001A1A  4E4F                    1026          TRAP #15
+00001A1C  5A41                    1027          ADD.W #BPistas_Gap,D1                                       ;añado el gap a la izquierda de la ficha, LEFT X   
+00001A1E  3601                    1028          MOVE.W D1,D3
+00001A20  0643 000D               1029          ADD.W #BPistas_Anchura,D3                                   ;RIGHT X
+00001A24  3802                    1030          MOVE.W D2,D4
+00001A26  0644 000D               1031          ADD.W #BPistas_Altura,D4                                    ;Valor final Y    
+00001A2A  7058                    1032          MOVE.L #88,D0                                               ;draw ellipse
+00001A2C  4E4F                    1033          TRAP #15       
+00001A2E  33C3 00003012           1034          MOVE.W D3,POSPX                                             ;muevo la posición X donde ha terminado esta ficha a la que será la inicial de la siguiente.     
+00001A34  4E75                    1035          RTS 
+00001A36                          1036  
+00001A36                          1037  *Subrutina que comprueba cuando debo pintar las pistas en una nueva linea
+00001A36  0C39 0003 0000300D      1038  SALTAL  CMP.B #3,CONTP
+00001A3E  6700 0004               1039          BEQ NUEVAL
+00001A42  4E75                    1040          RTS
+00001A44  33FC 0127 00003012      1041  NUEVAL  MOVE.W #Pistas_Izq,POSPX                                    ;REINICIALIZO LEFT X
+00001A4C  0679 000D 00003014      1042          ADD.W #BPistas_Altura,POSPY                                 ;pre-Valor final Y   
+00001A54  5A79 00003014           1043          ADD.W #BPistas_GapY,POSPY                                   ;Valor final Y
+00001A5A  4E75                    1044          RTS
+00001A5C                          1045  
+00001A5C                          1046  *Subrutina que dibuja la pantalla cuando se gana o se pierde        
+00001A5C  33FC 007D 0000300E      1047  FINAL   MOVE.W #Cinco_Boton_Izq, POSX                               ;Izq x
+00001A64  33FC 008C 00003010      1048          MOVE.W #Popup_B_txt1_Abajo,POSY                             ;upper y
+00001A6C  7056                    1049          MOVE.L #86, D0                                              ;indicar posicion inicial bolas
+00001A6E  4E4F                    1050          TRAP #15
+00001A70                          1051          
+00001A70  7C00                    1052          MOVE.L #0, D6                                               ;Inicio contador para ver cuantas bolas saco
+00001A72  207C 00003000           1053          MOVE.L #COMB, A0                                            ;Busco dirección primera bola solucion   
+00001A78  1A18                    1054  FINALB  MOVE.B (A0)+, D5                                            ;meto bola en variable para ir comparando con cada posible resultado
+00001A7A  BA3C 0000               1055          CMP.B #0, D5                                                ;Cada resultado determinara un color, que asignaré como color de fondo
+00001A7E  6600 0012               1056          BNE FINAL1                                                  ;si no es el que busco paso al siguiente
+00001A82  223C 000000FF           1057          MOVE.L #ROJO,D1                                             ;si lo es pinto el fondo con su color
+00001A88  7051                    1058          MOVE.L #81,D0                                               ;set fill color
+00001A8A  4E4F                    1059          TRAP #15
+00001A8C  4EF9 00001AF8           1060          JMP FINALP                                                  ;y me voy al final
+00001A92  BA3C 0001               1061  FINAL1  CMP.B #1, D5                                                ;igual para los 6 colores
+00001A96  6600 0012               1062          BNE FINAL2    
+00001A9A  223C 0000FFFF           1063          MOVE.L #AMARILLO,D1
+00001AA0  7051                    1064          MOVE.L #81,D0                                               ;set fill color
+00001AA2  4E4F                    1065          TRAP #15
+00001AA4  4EF9 00001AF8           1066          JMP FINALP
+00001AAA  BA3C 0002               1067  FINAL2  CMP.B #2, D5   
+00001AAE  6600 0012               1068          BNE FINAL3  
+00001AB2  223C 0000FF00           1069          MOVE.L #VERDE,D1
+00001AB8  7051                    1070          MOVE.L #81,D0                                               ;set fill color
+00001ABA  4E4F                    1071          TRAP #15
+00001ABC  4EF9 00001AF8           1072          JMP FINALP
+00001AC2  BA3C 0003               1073  FINAL3  CMP.B #3, D5   
+00001AC6  6600 000E               1074          BNE FINAL4  
+00001ACA  7200                    1075          MOVE.L #NEGRO,D1
+00001ACC  7051                    1076          MOVE.L #81,D0                                               ;set fill color
+00001ACE  4E4F                    1077          TRAP #15
+00001AD0  4EF9 00001AF8           1078          JMP FINALP
+00001AD6  BA3C 0004               1079  FINAL4  CMP.B #4, D5   
+00001ADA  6600 0012               1080          BNE FINAL5  
+00001ADE  223C 00000080           1081          MOVE.L #MARRON,D1
+00001AE4  7051                    1082          MOVE.L #81,D0                                               ;set fill color
+00001AE6  4E4F                    1083          TRAP #15
+00001AE8  4EF9 00001AF8           1084          JMP FINALP
+00001AEE  223C 00FFFFFF           1085  FINAL5  MOVE.L #BLANCO,D1
+00001AF4  7051                    1086          MOVE.L #81,D0                                               ;set fill color
+00001AF6  4E4F                    1087          TRAP #15      
+00001AF8  4EB8 19E0               1088  FINALP  JSR PFICHAS                                                 ;al final uso la subrutina de pintar fichas con el color de fondo que ya habré asignado
+00001AFC  5286                    1089          ADD.L #1, D6                                                ;Sumo uno al contador que me dice si es la ultima bola
+00001AFE  BC39 00003022           1090          CMP.B NBOLAS, D6                                            ;Lo es?    
+00001B04  6600 FF72               1091          BNE FINALB                                                  ;Si no, vuelvo a cargar la bola siguiente y vuelvo a pintar
+00001B08  4E75                    1092          RTS
+00001B0A                          1093          
+00001B0A                          1094  *Reservado de memoria           
+00003000                          1095          ORG $3000   
+00003000                          1096  COMB    DS.B 6 
+00003006                          1097  COMBU   DS.B 6
+0000300C                          1098  CONTF   DS.B 1                                                      ;CUENTO LAS FICHAS QUE YA HE PUESTO EN EL TURNO ACTUAL. AL LLEGAR A 3 COMPRUEBO VALORES.
+0000300D                          1099  CONTP   DS.B 1                                                      ;cuento las bolas de pistas que ya he puesto en el turno actual. Al llegar a 3 hago un salto de linea.
+0000300E                          1100  POSX    DS.B 2                                                      ;ALMACENO LA POSICIÓN X DE LA ÚLTIMA BOLA INTRODUCIDA
+00003010                          1101  POSY    DS.B 2                                                      ;ALMACENO LA POSICIÓN Y DE LA ÚLTIMA BOLA INTRODUCIDA
+00003012                          1102  POSPX   DS.B 2                                                      ;ALMACENO LA POSICIÓN X DE LA ÚLTIMA PISTA INSTORUCIDA
+00003014                          1103  POSPY   DS.B 2                                                      ;ALMACENO LA POSICIÓN Y DE LA ÚLTIMA PISTA INTRODUCIDA
+00003016                          1104  CONT    DS.B 6
+0000301C                          1105  CONTU   DS.B 6
+00003022                          1106  NBOLAS  DS.B 1
+00003023                          1107  TURNO   DS.B 1
+00003024                          1108  REPET   DS.B 1
+00003025                          1109  TOTALN  DS.B 1                                                      ;total bolas blancas
+00003026                          1110  TOTALB  DS.B 1                                                      ;total bolas negras
+00003027                          1111  BINST   DS.B 1                                                      ;BANDERA DEL BOTON DE INSTRUCCIONES
+00003028                          1112  *ojo con las posiciones desalineadas!!!
+00003028                          1113  
+00003028= 47 61 6D 65 57 69 ...   1114  GWin    DC.B 'GameWin.wav',0
+00003034= 47 61 6D 65 4F 76 ...   1115  GOver   DC.B 'GameOver.wav',0
+00003041                          1116  
+00003041= 45 6C 20 6F 62 6A ...   1117  MSJ1    DC.B 'El objetivo de Mastermind es descubrir la combinación de colores',0
+00003082= 71 75 65 20 65 6C ...   1118          DC.B 'que el programa crea aleatoriamente al principio del programa.  ',0
+000030C3= 53 65 20 64 69 73 ...   1119          DC.B 'Se dispone de un número de intentos limitados, que es definido  ',0
+00003104= 70 6F 72 20 65 6C ...   1120          DC.B 'por el usuario. La combinación puede ser de 4, 5 o 6 colores    ',0
+00003145= 73 65 67 FA 6E 20 ...   1121          DC.B 'según se defina. Cabe la posibilidad de no permitir repetición  ',0
+00003186= 64 65 20 63 6F 6C ...   1122          DC.B 'de colores en la combinación a encontrar. Cada fila de bolas    ',0
+000031C7= 63 6F 72 72 65 73 ...   1123          DC.B 'corresponde a un intento distinto. La introducción de bolas es  ',0
+00003208= 6D 65 64 69 61 6E ...   1124          DC.B 'mediante la pulsación de los botones rectangulares. Tras la     ',0
+00003249= 69 6E 74 72 6F 64 ...   1125          DC.B 'introducción de todas las bolas de un turno aparecerán una serie',0
+0000328A= 64 65 20 62 6F 6C ...   1126          DC.B 'de bolas más pequeñas; el número de bolas negras indicará       ',0
+000032CB= 63 75 61 6E 74 61 ...   1127          DC.B 'cuantas ha posicionado correctamente y el de blancas indicará   ',0
+0000330C= 63 75 61 6E 74 61 ...   1128          DC.B 'cuantas han acertado el color pero no la posición.              ',0
+0000334D= 4C 61 73 20 70 6F ...   1129          DC.B 'Las posiciones de estas pequeñas bolas no se corresponden con   ',0
+0000338E= 6C 61 73 20 64 65 ...   1130          DC.B 'las de la combinación introducida.                              ',0
+000033CF= 4E FA 6D 65 72 6F ...   1131  MSJ2    DC.B 'Número de bolas por turno:',0
+000033EA= 34 00                   1132  MSJ21   DC.B '4',0
+000033EC= 35 00                   1133  MSJ22   DC.B '5',0
+000033EE= 36 00                   1134  MSJ23   DC.B '6',0
+000033F0= 43 61 6E 74 69 64 ...   1135  MSJ3    DC.B 'Cantidad de turnos disponibles:',0
+00003410= 31 32 00                1136  MSJ31   DC.B '12',0
+00003413= 31 36 00                1137  MSJ32   DC.B '16',0
+00003416= BF 50 65 72 6D 69 ...   1138  MSJ4    DC.B '¿Permitir repeticiones?:',0
+0000342F= 53 ED 00                1139  MSJSI   DC.B 'Sí',0
+00003432= 4E 6F 00                1140  MSJNO   DC.B 'No',0  
+00003435= A1 A1 45 4E 48 4F ...   1141  MSJ5    DC.B '¡¡ENHORABUENA, HA GANADO!!',0
+00003450= 4E 6F 20 64 69 73 ...   1142  MSJ6    DC.B 'No dispone de más turnos, ha perdido.',0
+00003476= 44 65 73 65 61 20 ...   1143  MSJ7    DC.B 'Desea jugar de nuevo?',0
+0000348C= 56 65 72 20 49 6E ...   1144  MSJ8    DC.B 'Ver Instrucciones',0
+0000349E= 43 65 72 72 61 72 ...   1145  MSJ9    DC.B 'Cerrar Instrucciones',0
+000034B3                          1146  
+000034B3                          1147          END START
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+ABAI                1766
+ABAS                174C
+ABREINS             165E
+AMARILLO            FFFF
+AZUL                FF0000
+A_BOTON_ABAJO       4B
+A_BOTON_ARRIBA      37
+BIEN                1722
+BINST               3027
+BLANCO              FFFFFF
+BNCONT              17A2
+BPISTAS_ALTURA      D
+BPISTAS_ANCHURA     D
+BPISTAS_GAP         5
+BPISTAS_GAPY        5
+B_BOTON_ABAJO       AF
+B_BOTON_ARRIBA      9B
+CANT                111C
+CFIN                1738
+CHKB                10B4
+CHKC                1196
+CHKINST             15C4
+CHKP                125C
+CHK_5               10EC
+CHK_6               1108
+CHK_A               14D8
+CHK_B               1594
+CHK_DI              11CE
+CHK_M               1564
+CHK_N               1538
+CHK_NO              1294
+CHK_V               1508
+CINCO_BOTON_DER     A5
+CINCO_BOTON_IZQ     7D
+CINCO_TXT_ARRIBA    7B
+CINCO_TXT_IZQ       8C
+CMP11               16EC
+CMPTODO             16D6
+COLOR_BOTON_ALTURA  14
+COLOR_BOTON_ANCHURA  32
+COLOR_BOTON_DER     1B3
+COLOR_BOTON_GAP     5
+COLOR_BOTON_IZQ     181
+COMB                3000
+COMBU               3006
+COMPS               1460
+CONT                3016
+CONTF               300C
+CONTP               300D
+CONTU               301C
+CUATRO_BOTON_DER    78
+CUATRO_BOTON_IZQ    50
+CUATRO_TXT_ARRIBA   7B
+CUATRO_TXT_IZQ      5F
+DIECI_BOTON_DER     A5
+DIECI_BOTON_IZQ     7D
+DIECI_TXT_ARRIBA    DF
+DIECI_TXT_IZQ       8C
+DOCE_BOTON_DER      78
+DOCE_BOTON_IZQ      50
+DOCE_TXT_ARRIBA     DF
+DOCE_TXT_IZQ        5F
+ESCRIBE             168E
+FICHA_ALTURA        1E
+FICHA_ANCHURA       1E
+FICHA_GAP           A
+FIN                 1982
+FINABAI             1782
+FINABAS             178A
+FINAL               1A5C
+FINAL1              1A92
+FINAL2              1AAA
+FINAL3              1AC2
+FINAL4              1AD6
+FINAL5              1AEE
+FINALB              1A78
+FINALP              1AF8
+FINPOP              12A8
+GANAR               1850
+GOVER               3034
+GRIS                808080
+GUARDA              146A
+GWIN                3028
+INIRND              1986
+INST_BOTON_ABAJO    32
+INST_BOTON_ALTURA   14
+INST_BOTON_ANCHURA  C8
+INST_BOTON_ARRIBA   1E
+INST_BOTON_DER      299
+INST_BOTON_IZQ      1D1
+INST_B_TXT_ARRIBA   21
+INST_B_TXT_IZQ      1E2
+LAB_RND             1992
+LILA                800080
+MAL                 1730
+MARRON              80
+MSJ1                3041
+MSJ2                33CF
+MSJ21               33EA
+MSJ22               33EC
+MSJ23               33EE
+MSJ3                33F0
+MSJ31               3410
+MSJ32               3413
+MSJ4                3416
+MSJ5                3435
+MSJ6                3450
+MSJ7                3476
+MSJ8                348C
+MSJ9                349E
+MSJNO               3432
+MSJSI               342F
+M_BOTON_ABAJO       96
+M_BOTON_ARRIBA      82
+NBOLAS              3022
+NEGRO               0
+NI                  1428
+NINC0               19B6
+NINC1               19BC
+NOALARG             12F6
+NOMOD               12C2
+NO_BOTON_DER        A5
+NO_BOTON_IZQ        7D
+NO_TXT_ARRIBA       143
+NO_TXT_IZQ          8C
+NREP                1450
+NUEVAL              1A44
+N_BOTON_ABAJO       7D
+N_BOTON_ARRIBA      69
+OTRA                18CE
+OTRANO              1976
+OTRAP               1948
+OTRO                1436
+OTROTURNO           147C
+PERDER              1892
+PERM                11E2
+PFICHAS             19E0
+PISTASB             181E
+PISTASN             17F0
+PISTAS_ABAJO        212
+PISTAS_ALTURA       1F4
+PISTAS_ANCHURA      3C
+PISTAS_ARRIBA       1E
+PISTAS_DER          163
+PISTAS_IZQ          127
+POPUP_ABAJO         1B8
+POPUP_ALTURA        190
+POPUP_ANCHURA       1F4
+POPUP_ARRIBA        28
+POPUP_BOTON_ALTURA  14
+POPUP_BOTON_ANCHURA  28
+POPUP_BOTON_GAPX    5
+POPUP_B_TXT1_ABAJO  8C
+POPUP_B_TXT1_ARRIBA  78
+POPUP_B_TXT2_ABAJO  F0
+POPUP_B_TXT2_ARRIBA  DC
+POPUP_B_TXT3_ABAJO  154
+POPUP_B_TXT3_ARRIBA  140
+POPUP_DER           226
+POPUP_IZQ           32
+POPUP_TXT1_ABAJO    78
+POPUP_TXT1_ARRIBA   5A
+POPUP_TXT1_GAPX     F
+POPUP_TXT1_GAPY     3
+POPUP_TXT1_IZQ      50
+POPUP_TXT2_ABAJO    DC
+POPUP_TXT2_ARRIBA   BE
+POPUP_TXT2_GAPX     F
+POPUP_TXT2_GAPY     3
+POPUP_TXT2_IZQ      50
+POPUP_TXT3_ABAJO    140
+POPUP_TXT3_ARRIBA   122
+POPUP_TXT3_GAPX     F
+POPUP_TXT3_GAPY     3
+POPUP_TXT3_IZQ      50
+POPUP_TXT_ALTURA    1E
+POPUP_TXT_IZQ       50
+POPUP_TXT_SEPARA    32
+POSPX               3012
+POSPY               3014
+POSX                300E
+POSY                3010
+PPISTAS             1A0C
+PRNL                19DC
+RANGO               5
+RELAJA              16AC
+REPET               3024
+ROJO                FF
+R_BOTON_ABAJO       32
+R_BOTON_ARRIBA      1E
+SALTAL              1A36
+SEIS_BOTON_DER      D2
+SEIS_BOTON_IZQ      AA
+SEIS_TXT_ARRIBA     7B
+SEIS_TXT_IZQ        B9
+SIG11               171A
+SIGUEOB             148A
+SI_BOTON_DER        78
+SI_BOTON_IZQ        50
+SI_TXT_ARRIBA       143
+SI_TXT_IZQ          5F
+START               1000
+TABLA_ABAJO         212
+TABLA_ALTURA        1F4
+TABLA_ANCHURA       FF
+TABLA_ARRIBA        1E
+TABLA_DER           113
+TABLA_IZQ           14
+TEXTO_INFO_ABAJO    1E0
+TEXTO_INFO_ARRIBA   46
+TEXTO_INFO_DER      429
+TEXTO_INFO_GAP      14
+TEXTO_INFO_IZQ      1D1
+TOTALB              3026
+TOTALN              3025
+TURNO               3023
+VERDE               FF00
+V_BOTON_ABAJO       64
+V_BOTON_ARRIBA      50
